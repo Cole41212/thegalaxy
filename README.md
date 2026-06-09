@@ -1,51 +1,144 @@
 # The Galaxy — Network & Security Home Lab
 
-**Cybersecurity student** (Marist University, graduating 2026) building a 
-segmented homelab focused on blue team skills: network defense, SIEM, 
-log analysis, and vulnerability management.
+A production-grade homelab built by a cybersecurity student (Marist University, class of
+2026) to develop and demonstrate blue team skills: network defense, segmentation,
+SIEM, log analysis, and vulnerability management.
+
+> **AI-assisted workflow:** This project is built with Claude (Anthropic) as an AI pair
+> programmer and documentation partner. Leveraging AI to accelerate learning, diagnose
+> complex issues, and produce professional documentation is an intentional skill. All
+> configurations are applied and verified on real hardware by the project owner.
+
+---
 
 ## What This Is
 
-A production-grade home network running on enterprise-style architecture:
-- OPNsense firewall with full VLAN segmentation
-- Proxmox hypervisor hosting all VMs and services
-- Wazuh SIEM for centralized log collection and alerting
-- Isolated security lab for offensive/defensive practice
-- Pi-hole DNS filtering and Tailscale remote access
+A home network redesigned from a flat consumer setup into an enterprise-style segmented
+architecture, documented end-to-end as a portfolio artifact. Every design decision has a
+rationale. Every major issue encountered in the build is logged with root cause and fix.
+
+The lab demonstrates practical skills directly applicable to security operations, network
+engineering, and infrastructure roles — not theoretical knowledge, but working
+configurations on real hardware.
+
+---
 
 ## Architecture
+![Network Topology](network/diagrams/phase1-topology.svg)
+![VLAN Architecture](network/diagrams/vlan-architecture.svg)
+### Network Topology
 
-| VLAN | Name | Subnet | Purpose |
-|------|------|--------|---------|
-| 10 | Management | 10.0.10.0/24 | Switches, APs, Proxmox host |
-| 20 | Trusted | 10.0.20.0/24 | Personal devices |
-| 30 | Servers | 10.0.30.0/24 | VMs and NAS |
-| 40 | Family | 10.0.40.0/24 | Family devices |
-| 50 | IoT/Guest | 10.0.50.0/24 | Smart devices, guests |
-| 60 | Security Lab | 10.0.60.0/24 | Isolated attack/defense |
+```
+Internet → senate (Asus GT-AX11000, 192.168.1.1)
+               │
+               │ static route: 10.0.0.0/16 → 192.168.1.100
+               │
+           executor (Proxmox VE 9.1.1)
+           ├── enp0s31f6 → vmbr0 (WAN, 192.168.1.225)
+           └── enp1s0 → vmbr1 (LAN trunk, VLAN-aware)
+                   │
+               ┌───▼──────────┐
+               │    tarkin     │  OPNsense 26.1.6
+               │ WAN: .1.100  │  6 VLAN interfaces
+               │ DHCP + DNS   │  Kea DHCPv4
+               │ Firewall     │  802.1Q inter-VLAN routing
+               └───┬──────────┘
+                   │ VLAN trunk
+               death-star (ZX-SWTGW215AS 2.5G managed switch)
+               ├── Port 2: falcon (access, VLAN 20)
+               ├── Port 3: holonet (trunk, VLANs 20/40/50)
+               └── Port 5: archives (access, VLAN 30)
+```
+
+### VLAN Segmentation
+
+| VLAN | Name | Subnet | Purpose | Internet | Homelab |
+|------|------|--------|---------|----------|---------|
+| 10 | Management | 10.0.10.0/24 | Network infrastructure | ✅ | Reachable from Trusted |
+| 20 | Trusted | 10.0.20.0/24 | Personal devices | ✅ | Full access |
+| 30 | Servers | 10.0.30.0/24 | VMs and NAS | ✅ | No access to Trusted |
+| 40 | Family | 10.0.40.0/24 | Family devices | ✅ | Fully blocked |
+| 50 | IoT/Guest | 10.0.50.0/24 | Smart devices, guests | ✅ | Fully blocked |
+| 60 | Security Lab | 10.0.60.0/24 | Kali + vulnerable VMs | ✅ | Fully blocked |
+
+### WiFi Networks
+
+| SSID | VLAN | Purpose |
+|------|------|---------|
+| HoloNet | 20 (Trusted) | Personal devices |
+| OuterRim | 40 (Family) | Family devices |
+| MosEisley | 50 (IoT/Guest) | IoT, guests |
+
+---
 
 ## Hardware
 
-| Host | Role | Specs |
-|------|------|-------|
-| executor | Proxmox hypervisor | HP ProDesk 600 G3, i5-7500T, 32GB RAM |
-| archives | NAS (Phase 2) | HP EliteDesk 800 G3, 2×2TB HDD |
-| death-star | Core switch | 2.5G 8-port managed |
-| holonet | Wireless AP | Asus RT-AC68U |
+| Hostname | Role | Specs |
+|----------|------|-------|
+| executor | Proxmox hypervisor | i7, 64GB DDR4, 1TB NVMe, 6×4TB HDD, GPU, 3× NICs |
+| tarkin | OPNsense firewall (VM) | VM on executor |
+| archives | TrueNAS SCALE (VM) | VM on executor, HDD controller passthrough |
+| death-star | Core switch | ZX-SWTGW215AS, 8-port 2.5G managed |
+| holonet | WiFi AP | TP-Link TL-WA1201, Multi-SSID mode |
+| senate | House router | Asus GT-AX11000 (family network, not lab-managed) |
+| falcon | Main workstation | i5-13600K, RTX 3060Ti, 32GB DDR5, Windows 10 |
+| scout | Laptop | Linux Mint Cinnamon, ethernet + WiFi |
+| comlink | Mobile | iPhone |
+
+---
+
+## VM Inventory
+
+| VM ID | Hostname | OS | Role | VLAN | Status |
+|-------|----------|----|------|------|--------|
+| 100 | tarkin | OPNsense 26.1.6 | Firewall, DHCP, DNS | All | ✅ Running |
+| 101 | phantom | Ubuntu | Tailscale exit node | 30 | ✅ Running |
+| 103 | shipyard | Ubuntu Server | Docker, Portainer, Crafty | 30 | Phase 2 |
+| 104 | order66 | — | Pi-hole DNS | 30 | Phase 3 |
+| 105 | inquisitor | — | Wazuh SIEM | 30 | Phase 6 |
+| 106 | cantina | — | Jellyfin | 30 | Phase 4 |
+| 107 | vault | — | Nextcloud | 30 | Phase 5 |
+| 108 | maul | Kali Linux | Pentesting | 60 | Phase 7 |
+| 109 | rogue | — | Vulnerable VM | 60 | Phase 7 |
+| — | archives | TrueNAS SCALE | NAS (HDD passthrough) | 30 | Phase 2 |
+
+---
 
 ## Phases
 
 | Phase | Focus | Status |
 |-------|-------|--------|
-| 1 | Core network — OPNsense, VLANs, firewall | 🔄 In Progress |
-| 2 | TrueNAS storage | ⬜ Not Started |
-| 3 | Pi-hole DNS + Tailscale VPN | ⬜ Not Started |
-| 4 | Jellyfin media server | ⬜ Not Started |
-| 5 | Nextcloud file server | ⬜ Not Started |
-| 6 | Wazuh SIEM + dashboard displays | ⬜ Not Started |
-| 7 | Security lab — Kali + vulnerable VM | ⬜ Not Started |
-| 8 | AI tools + portfolio | ⬜ Not Started |
+| **1** | Core network — OPNsense, VLANs, managed switch, WiFi AP | ✅ Complete |
+| **2** | Docker services (shipyard), Crafty/Minecraft, TrueNAS VM | 🔄 In Progress |
+| **3** | Pi-hole DNS filtering + Tailscale remote access | ⬜ |
+| **4** | Jellyfin media server with GPU transcoding | ⬜ |
+| **5** | Nextcloud file server | ⬜ |
+| **6** | Wazuh SIEM + dashboard displays | ⬜ |
+| **7** | Security lab — Kali + vulnerable VM | ⬜ |
+| **8** | AI tools + portfolio website | ⬜ |
+
+---
 
 ## Skills Demonstrated
-`Network segmentation` `Firewall policy` `VLAN design` `Proxmox` 
-`OPNsense` `Docker` `Wazuh SIEM` `Pi-hole` `Tailscale` `Threat detection`
+
+`Network segmentation` `VLAN design` `802.1Q trunking` `Firewall policy`
+`OPNsense` `Proxmox VE` `Kea DHCPv4` `Unbound DNS` `Managed switch configuration`
+`Static routing` `Asymmetric routing diagnosis` `Docker` `TrueNAS` `Wazuh SIEM`
+`Pi-hole` `Tailscale` `Kali Linux` `AI-assisted engineering workflow`
+
+---
+
+## Repository Structure
+
+```
+thegalaxy/
+├── README.md                    ← this file
+├── network/
+│   ├── diagrams/                ← SVG network diagrams
+│   └── ip-scheme.md             ← VLAN table and static IP assignments
+├── phases/
+│   ├── phase-1-core-network.md  ← decisions, architecture, build log
+│   └── phase-N-*.md
+├── runbooks/                    ← step-by-step operational procedures
+└── assets/                      ← screenshots, config exports
+```

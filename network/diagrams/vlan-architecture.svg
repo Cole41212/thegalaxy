@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 540" width="860" height="540">
+  <!-- Background -->
+  <rect width="860" height="540" fill="#0f172a" rx="12"/>
+
+  <!-- Title -->
+  <text x="430" y="32" fill="#f1f5f9" font-family="monospace" font-size="15" font-weight="bold" text-anchor="middle">VLAN Segmentation &amp; Firewall Policy</text>
+  <text x="430" y="50" fill="#64748b" font-family="monospace" font-size="10" text-anchor="middle">tarkin (OPNsense) enforces all inter-VLAN rules · 10.0.0.0/16</text>
+
+  <!-- tarkin center -->
+  <rect x="330" y="208" width="200" height="80" rx="10" fill="#1e293b" stroke="#f97316" stroke-width="2"/>
+  <text x="430" y="234" fill="#f97316" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">tarkin</text>
+  <text x="430" y="250" fill="#64748b" font-family="monospace" font-size="9" text-anchor="middle">OPNsense 26.1.6</text>
+  <text x="430" y="264" fill="#64748b" font-family="monospace" font-size="9" text-anchor="middle">Inter-VLAN Firewall</text>
+  <text x="430" y="278" fill="#64748b" font-family="monospace" font-size="9" text-anchor="middle">Kea DHCPv4 · Unbound DNS</text>
+
+  <!-- VLAN 10 Management - top left -->
+  <rect x="60" y="80" width="170" height="64" rx="8" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5"/>
+  <rect x="60" y="80" width="170" height="18" rx="8" fill="#334155"/>
+  <rect x="60" y="91" width="170" height="7" fill="#334155"/>
+  <text x="145" y="93" fill="#e2e8f0" font-family="monospace" font-size="9" font-weight="bold" text-anchor="middle">VLAN 10 · MANAGEMENT</text>
+  <text x="145" y="109" fill="#94a3b8" font-family="monospace" font-size="9" text-anchor="middle">10.0.10.0/24</text>
+  <text x="145" y="122" fill="#64748b" font-family="monospace" font-size="8" text-anchor="middle">death-star · holonet · executor</text>
+  <text x="145" y="135" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">→ Internet ✓ · blocked from Trusted</text>
+
+  <!-- VLAN 20 Trusted - top center -->
+  <rect x="268" y="68" width="170" height="64" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+  <rect x="268" y="68" width="170" height="18" rx="8" fill="#14532d"/>
+  <rect x="268" y="79" width="170" height="7" fill="#14532d"/>
+  <text x="353" y="81" fill="#4ade80" font-family="monospace" font-size="9" font-weight="bold" text-anchor="middle">VLAN 20 · TRUSTED</text>
+  <text x="353" y="97" fill="#86efac" font-family="monospace" font-size="9" text-anchor="middle">10.0.20.0/24</text>
+  <text x="353" y="110" fill="#64748b" font-family="monospace" font-size="8" text-anchor="middle">falcon · scout · comlink</text>
+  <text x="353" y="123" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">→ Unrestricted access ✓</text>
+
+  <!-- VLAN 30 Servers - right -->
+  <rect x="630" y="180" width="170" height="64" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+  <rect x="630" y="180" width="170" height="18" rx="8" fill="#1e3a5f"/>
+  <rect x="630" y="191" width="170" height="7" fill="#1e3a5f"/>
+  <text x="715" y="193" fill="#93c5fd" font-family="monospace" font-size="9" font-weight="bold" text-anchor="middle">VLAN 30 · SERVERS</text>
+  <text x="715" y="209" fill="#60a5fa" font-family="monospace" font-size="9" text-anchor="middle">10.0.30.0/24</text>
+  <text x="715" y="222" fill="#64748b" font-family="monospace" font-size="8" text-anchor="middle">shipyard · archives · order66</text>
+  <text x="715" y="235" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">→ Internet ✓ · ✗ Trusted</text>
+
+  <!-- VLAN 40 Family - bottom right -->
+  <rect x="622" y="338" width="170" height="64" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+  <rect x="622" y="338" width="170" height="18" rx="8" fill="#451a03"/>
+  <rect x="622" y="349" width="170" height="7" fill="#451a03"/>
+  <text x="707" y="351" fill="#fcd34d" font-family="monospace" font-size="9" font-weight="bold" text-anchor="middle">VLAN 40 · FAMILY</text>
+  <text x="707" y="367" fill="#fbbf24" font-family="monospace" font-size="9" text-anchor="middle">10.0.40.0/24</text>
+  <text x="707" y="380" fill="#64748b" font-family="monospace" font-size="8" text-anchor="middle">naboo · tatooine (optional)</text>
+  <text x="707" y="393" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">→ Internet only · ✗ Homelab</text>
+
+  <!-- VLAN 50 IoT/Guest - bottom center -->
+  <rect x="348" y="406" width="170" height="64" rx="8" fill="#1e293b" stroke="#a78bfa" stroke-width="1.5"/>
+  <rect x="348" y="406" width="170" height="18" rx="8" fill="#2e1065"/>
+  <rect x="348" y="417" width="170" height="7" fill="#2e1065"/>
+  <text x="433" y="419" fill="#c4b5fd" font-family="monospace" font-size="9" font-weight="bold" text-anchor="middle">VLAN 50 · IOT/GUEST</text>
+  <text x="433" y="435" fill="#a78bfa" font-family="monospace" font-size="9" text-anchor="middle">10.0.50.0/24</text>
+  <text x="433" y="448" fill="#64748b" font-family="monospace" font-size="8" text-anchor="middle">Smart devices · guests</text>
+  <text x="433" y="461" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">→ Internet only · ✗ Homelab</text>
+
+  <!-- VLAN 60 SecLab - bottom left -->
+  <rect x="60" y="338" width="170" height="64" rx="8" fill="#1e293b" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="60" y="338" width="170" height="18" rx="8" fill="#450a0a"/>
+  <rect x="60" y="349" width="170" height="7" fill="#450a0a"/>
+  <text x="145" y="351" fill="#fca5a5" font-family="monospace" font-size="9" font-weight="bold" text-anchor="middle">VLAN 60 · SECURITY LAB</text>
+  <text x="145" y="367" fill="#f87171" font-family="monospace" font-size="9" text-anchor="middle">10.0.60.0/24</text>
+  <text x="145" y="380" fill="#64748b" font-family="monospace" font-size="8" text-anchor="middle">maul (Kali) · rogue (vuln VM)</text>
+  <text x="145" y="393" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">→ Fully isolated · ✗ All</text>
+
+  <!-- Connection lines - VLAN 10 to tarkin -->
+  <line x1="230" y1="130" x2="340" y2="230" stroke="#475569" stroke-width="1" stroke-dasharray="4,2"/>
+
+  <!-- VLAN 20 to tarkin -->
+  <line x1="353" y1="132" x2="390" y2="208" stroke="#10b981" stroke-width="1.5"/>
+
+  <!-- VLAN 30 to tarkin -->
+  <line x1="630" y1="212" x2="530" y2="245" stroke="#3b82f6" stroke-width="1.5"/>
+
+  <!-- VLAN 40 to tarkin -->
+  <line x1="622" y1="358" x2="530" y2="288" stroke="#f59e0b" stroke-width="1"/>
+
+  <!-- VLAN 50 to tarkin -->
+  <line x1="433" y1="406" x2="433" y2="288" stroke="#a78bfa" stroke-width="1"/>
+
+  <!-- VLAN 60 to tarkin -->
+  <line x1="230" y1="358" x2="340" y2="285" stroke="#ef4444" stroke-width="1"/>
+
+  <!-- Internet connection at top -->
+  <ellipse cx="430" cy="490" rx="55" ry="22" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="430" y="487" fill="#64748b" font-family="monospace" font-size="10" text-anchor="middle">Internet</text>
+  <text x="430" y="501" fill="#334155" font-family="monospace" font-size="8" text-anchor="middle">via senate (NAT)</text>
+
+  <!-- Arrow from tarkin to internet -->
+  <line x1="430" y1="288" x2="430" y2="468" stroke="#334155" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <!-- Legend box -->
+  <rect x="30" y="452" width="280" height="72" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+  <text x="170" y="470" fill="#64748b" font-family="monospace" font-size="9" font-weight="bold" text-anchor="middle">FIREWALL POLICY NOTES</text>
+  <text x="40" y="486" fill="#475569" font-family="monospace" font-size="8">✓ TRUSTED: full unrestricted access to all zones</text>
+  <text x="40" y="499" fill="#475569" font-family="monospace" font-size="8">✓ SERVERS: internet + lab, blocked from Trusted</text>
+  <text x="40" y="512" fill="#475569" font-family="monospace" font-size="8">✗ FAMILY / IOT: internet only, all homelab blocked</text>
+  <text x="40" y="525" fill="#ef4444" font-family="monospace" font-size="8">✗ SECLAB: fully isolated — attack traffic cannot escape</text>
+</svg>
