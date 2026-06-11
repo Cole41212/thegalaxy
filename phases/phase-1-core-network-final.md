@@ -216,7 +216,7 @@ iface vmbr1.10 inet static
 | WAN block private networks disabled | ✅ | tarkin faces senate LAN not internet |
 | Hardware migration to new all-in-one PC | ✅ | NVMe clone, SSD transplant |
 | Proxmox NVMe migration (SanDisk → Samsung 970 EVO) | ✅ | LVM expanded to 465GB |
-| Firewall rules migration to Rules [new] | ⬜ | Pushed to Phase 2 |
+| Firewall rules migration to Rules [new] | ✅ | Pushed to Phase 2 |
 
 ---
 

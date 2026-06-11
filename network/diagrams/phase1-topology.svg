@@ -1,117 +1,121 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" width="900" height="620">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" width="900" height="640">
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M2 2L8 5L2 8" fill="none" stroke="#64748b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
-    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M2 2L8 5L2 8" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-dark" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 2L8 5L2 8" fill="none" stroke="#475569" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
   </defs>
 
-  <!-- Background -->
-  <rect width="900" height="620" fill="#0f172a" rx="12"/>
+  <rect width="900" height="640" fill="#0f172a" rx="12"/>
 
-  <!-- Title -->
-  <text x="450" y="36" fill="#f1f5f9" font-family="monospace" font-size="16" font-weight="bold" text-anchor="middle">The Galaxy — Phase 1 Network Topology</text>
-  <text x="450" y="54" fill="#64748b" font-family="monospace" font-size="11" text-anchor="middle">Dedicated NIC Architecture · OPNsense VLAN Segmentation</text>
+  <text x="450" y="24" fill="#f1f5f9" font-family="monospace" font-size="15" font-weight="bold" text-anchor="middle">The Galaxy — Phase 1 Network Topology</text>
+  <text x="450" y="40" fill="#64748b" font-family="monospace" font-size="10" text-anchor="middle">Dedicated NIC Architecture · OPNsense VLAN Segmentation · June 2026</text>
 
-  <!-- Internet cloud -->
-  <ellipse cx="450" cy="95" rx="60" ry="26" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
-  <text x="450" y="92" fill="#94a3b8" font-family="monospace" font-size="11" text-anchor="middle">Internet</text>
-  <text x="450" y="106" fill="#475569" font-family="monospace" font-size="9" text-anchor="middle">ISP / FiOS</text>
+  <!-- Internet -->
+  <ellipse cx="450" cy="75" rx="58" ry="22" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="450" y="72" fill="#94a3b8" font-family="monospace" font-size="11" text-anchor="middle">Internet</text>
+  <text x="450" y="86" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">FiOS / ISP</text>
+  <line x1="450" y1="97" x2="450" y2="109" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
 
-  <!-- Senate box -->
-  <rect x="340" y="138" width="220" height="56" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
-  <text x="450" y="160" fill="#94a3b8" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">senate</text>
-  <text x="450" y="176" fill="#475569" font-family="monospace" font-size="9" text-anchor="middle">Asus GT-AX11000 · 192.168.1.1/24</text>
-  <text x="450" y="188" fill="#475569" font-family="monospace" font-size="9" text-anchor="middle">Static route: 10.0.0.0/16 → 192.168.1.100</text>
+  <!-- Senate -->
+  <rect x="310" y="109" width="280" height="60" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+  <text x="450" y="129" fill="#94a3b8" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">senate</text>
+  <text x="450" y="145" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">Asus GT-AX11000 · 192.168.1.1/24</text>
+  <text x="450" y="159" fill="#334155" font-family="monospace" font-size="8" text-anchor="middle">Static route: 10.0.0.0/16 → 192.168.1.100</text>
 
-  <!-- Line internet to senate -->
-  <line x1="450" y1="121" x2="450" y2="138" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- Senate to executor -->
+  <line x1="450" y1="169" x2="450" y2="191" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="456" y="182" fill="#475569" font-family="monospace" font-size="8">enp0s31f6 → vmbr0 (WAN)</text>
 
-  <!-- Executor outer box -->
-  <rect x="200" y="218" width="500" height="200" rx="10" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,3"/>
-  <text x="220" y="238" fill="#3b82f6" font-family="monospace" font-size="10" font-weight="bold">executor · Proxmox VE 9.1.1</text>
-  <text x="680" y="238" fill="#1d4ed8" font-family="monospace" font-size="9" text-anchor="end">i7 · 64GB · 1TB NVMe · 3× NICs</text>
+  <!-- Executor outer dashed box -->
+  <rect x="195" y="193" width="510" height="205" rx="10" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="215" y="210" fill="#3b82f6" font-family="monospace" font-size="9" font-weight="bold">executor · Proxmox VE 9.1.1</text>
+  <text x="695" y="210" fill="#1d4ed8" font-family="monospace" font-size="8" text-anchor="end">i7 · 64GB DDR4 · 1TB NVMe · 3× NICs</text>
 
-  <!-- vmbr0 label -->
-  <text x="320" y="260" fill="#475569" font-family="monospace" font-size="9" text-anchor="middle">enp0s31f6 → vmbr0</text>
-  <text x="320" y="272" fill="#475569" font-family="monospace" font-size="9" text-anchor="middle">WAN bridge</text>
+  <!-- tarkin VM box -->
+  <rect x="308" y="220" width="282" height="152" rx="8" fill="#1e293b" stroke="#f97316" stroke-width="1.5"/>
+  <text x="449" y="240" fill="#f97316" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">tarkin (VM 100)</text>
+  <text x="449" y="256" fill="#64748b" font-family="monospace" font-size="8" text-anchor="middle">OPNsense 26.1.6 · Kea DHCPv4 · Unbound</text>
+  <line x1="315" y1="263" x2="583" y2="263" stroke="#374151" stroke-width="0.5"/>
+  <text x="449" y="278" fill="#22d3ee" font-family="monospace" font-size="8" text-anchor="middle">WAN (vtnet0): 192.168.1.100 → senate</text>
+  <text x="449" y="292" fill="#64748b" font-family="monospace" font-size="8" text-anchor="middle">LAN (em0): trunk → all VLAN sub-interfaces</text>
+  <text x="325" y="308" fill="#64748b" font-family="monospace" font-size="7.5">VLAN 10: 10.0.10.1</text>
+  <text x="325" y="321" fill="#64748b" font-family="monospace" font-size="7.5">VLAN 20: 10.0.20.1</text>
+  <text x="325" y="334" fill="#64748b" font-family="monospace" font-size="7.5">VLAN 30: 10.0.30.1</text>
+  <text x="462" y="308" fill="#64748b" font-family="monospace" font-size="7.5">VLAN 40: 10.0.40.1</text>
+  <text x="462" y="321" fill="#64748b" font-family="monospace" font-size="7.5">VLAN 50: 10.0.50.1</text>
+  <text x="462" y="334" fill="#64748b" font-family="monospace" font-size="7.5">VLAN 60: 10.0.60.1</text>
+  <text x="449" y="358" fill="#374151" font-family="monospace" font-size="7.5" text-anchor="middle">Firewall · Inter-VLAN routing · DHCP · DNS</text>
 
-  <!-- vmbr1 label -->
-  <text x="580" y="260" fill="#475569" font-family="monospace" font-size="9" text-anchor="middle">enp1s0 → vmbr1</text>
-  <text x="580" y="272" fill="#475569" font-family="monospace" font-size="9" text-anchor="middle">LAN trunk · VLAN-aware</text>
+  <!-- phantom VM box (right of tarkin) -->
+  <rect x="604" y="232" width="88" height="56" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="648" y="252" fill="#94a3b8" font-family="monospace" font-size="9" font-weight="bold" text-anchor="middle">phantom</text>
+  <text x="648" y="266" fill="#475569" font-family="monospace" font-size="7.5" text-anchor="middle">(VM 101)</text>
+  <text x="648" y="279" fill="#334155" font-family="monospace" font-size="7.5" text-anchor="middle">Tailscale</text>
 
-  <!-- tarkin box inside executor -->
-  <rect x="320" y="282" width="260" height="114" rx="8" fill="#1e293b" stroke="#f97316" stroke-width="1.5"/>
-  <text x="450" y="300" fill="#f97316" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">tarkin (VM 100)</text>
-  <text x="450" y="314" fill="#64748b" font-family="monospace" font-size="9" text-anchor="middle">OPNsense 26.1.6 · Kea DHCPv4</text>
-  <!-- VLAN IPs inside tarkin -->
-  <text x="370" y="332" fill="#22d3ee" font-family="monospace" font-size="8">WAN: 192.168.1.100</text>
-  <text x="370" y="346" fill="#94a3b8" font-family="monospace" font-size="8">VLAN 10: 10.0.10.1</text>
-  <text x="370" y="358" fill="#94a3b8" font-family="monospace" font-size="8">VLAN 20: 10.0.20.1</text>
-  <text x="370" y="370" fill="#94a3b8" font-family="monospace" font-size="8">VLAN 30: 10.0.30.1</text>
-  <text x="500" y="346" fill="#94a3b8" font-family="monospace" font-size="8">VLAN 40: 10.0.40.1</text>
-  <text x="500" y="358" fill="#94a3b8" font-family="monospace" font-size="8">VLAN 50: 10.0.50.1</text>
-  <text x="500" y="370" fill="#94a3b8" font-family="monospace" font-size="8">VLAN 60: 10.0.60.1</text>
-  <!-- phantom label -->
-  <text x="240" y="360" fill="#475569" font-family="monospace" font-size="8">phantom (101)</text>
-  <text x="240" y="372" fill="#475569" font-family="monospace" font-size="8">Tailscale exit node</text>
+  <!-- Future VMs note -->
+  <text x="605" y="302" fill="#1e3a5f" font-family="monospace" font-size="7">Phase 2+ VMs:</text>
+  <text x="605" y="313" fill="#1e3a5f" font-family="monospace" font-size="7">shipyard · archives</text>
+  <text x="605" y="324" fill="#1e3a5f" font-family="monospace" font-size="7">cantina · vault</text>
+  <text x="605" y="335" fill="#1e3a5f" font-family="monospace" font-size="7">inquisitor · maul...</text>
 
-  <!-- Arrow senate to executor WAN side -->
-  <line x1="395" y1="194" x2="340" y2="250" stroke="#475569" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arrow)"/>
+  <!-- Executor to death-star (LAN trunk) -->
+  <line x1="450" y1="398" x2="450" y2="420" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+  <text x="456" y="411" fill="#3b82f6" font-family="monospace" font-size="8">enp1s0 → vmbr1 (LAN trunk · 802.1Q)</text>
 
-  <!-- Arrow executor LAN side to death-star -->
-  <line x1="580" y1="418" x2="580" y2="440" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+  <!-- death-star box -->
+  <rect x="353" y="422" width="194" height="50" rx="8" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="450" y="443" fill="#8b5cf6" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">death-star</text>
+  <text x="450" y="459" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">ZX-SWTGW215AS · 10.0.10.2</text>
 
-  <!-- Death-star box -->
-  <rect x="460" y="440" width="240" height="56" rx="8" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.5"/>
-  <text x="580" y="462" fill="#8b5cf6" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">death-star</text>
-  <text x="580" y="476" fill="#475569" font-family="monospace" font-size="9" text-anchor="middle">ZX-SWTGW215AS · 2.5G · 10.0.10.2</text>
-  <text x="580" y="488" fill="#334155" font-family="monospace" font-size="8" text-anchor="middle">802.1Q trunk on port 1</text>
+  <!-- death-star to falcon (port 2) -->
+  <line x1="408" y1="472" x2="252" y2="510" stroke="#475569" stroke-width="1.2" marker-end="url(#arr-dark)"/>
+  <text x="356" y="484" fill="#334155" font-family="monospace" font-size="7.5" text-anchor="middle">Port 2</text>
 
-  <!-- Port lines from death-star to devices -->
-  <!-- Port 2: falcon -->
-  <line x1="500" y1="496" x2="340" y2="538" stroke="#475569" stroke-width="1" marker-end="url(#arrow)"/>
-  <rect x="240" y="538" width="160" height="44" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
-  <text x="320" y="556" fill="#10b981" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">falcon</text>
-  <text x="320" y="570" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">VLAN 20 · 10.0.20.10</text>
-  <text x="320" y="582" fill="#334155" font-family="monospace" font-size="8" text-anchor="middle">Port 2 · PVID 20</text>
+  <!-- death-star to holonet (port 3) -->
+  <line x1="492" y1="472" x2="648" y2="510" stroke="#475569" stroke-width="1.2" marker-end="url(#arr-dark)"/>
+  <text x="544" y="484" fill="#334155" font-family="monospace" font-size="7.5" text-anchor="middle">Port 3</text>
 
-  <!-- Port 3: holonet -->
-  <line x1="540" y1="496" x2="540" y2="538" stroke="#475569" stroke-width="1" marker-end="url(#arrow)"/>
-  <rect x="460" y="538" width="160" height="44" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
-  <text x="540" y="556" fill="#f59e0b" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">holonet</text>
-  <text x="540" y="570" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">TL-WA1201 · 10.0.20.3</text>
-  <text x="540" y="582" fill="#334155" font-family="monospace" font-size="8" text-anchor="middle">Port 3 · VLANs 20/40/50</text>
+  <!-- falcon box -->
+  <rect x="158" y="510" width="188" height="52" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+  <text x="252" y="530" fill="#10b981" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">falcon</text>
+  <text x="252" y="545" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">VLAN 20 · 10.0.20.10</text>
+  <text x="252" y="557" fill="#334155" font-family="monospace" font-size="7" text-anchor="middle">i5-13600K · Windows 10</text>
 
-  <!-- Port 5: archives -->
-  <line x1="620" y1="496" x2="700" y2="538" stroke="#475569" stroke-width="1" marker-end="url(#arrow)"/>
-  <rect x="660" y="538" width="160" height="44" rx="6" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5"/>
-  <text x="740" y="556" fill="#94a3b8" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">archives</text>
-  <text x="740" y="570" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">TrueNAS · 10.0.30.20</text>
-  <text x="740" y="582" fill="#334155" font-family="monospace" font-size="8" text-anchor="middle">Port 5 · PVID 30</text>
+  <!-- holonet box -->
+  <rect x="558" y="510" width="188" height="52" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="652" y="530" fill="#f59e0b" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">holonet</text>
+  <text x="652" y="545" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">TL-WA1201 · 10.0.20.3</text>
+  <text x="652" y="557" fill="#334155" font-family="monospace" font-size="7" text-anchor="middle">Multi-SSID · VLANs 20/40/50</text>
 
-  <!-- WiFi SSIDs from holonet -->
-  <text x="460" y="600" fill="#f59e0b" font-family="monospace" font-size="8" text-anchor="middle">HoloNet(20) OuterRim(40) MosEisley(50)</text>
+  <!-- WiFi SSIDs -->
+  <text x="652" y="577" fill="#f59e0b" font-family="monospace" font-size="8" text-anchor="middle">HoloNet (VLAN 20)</text>
+  <text x="652" y="590" fill="#d97706" font-family="monospace" font-size="8" text-anchor="middle">OuterRim (VLAN 40)</text>
+  <text x="652" y="603" fill="#78350f" font-family="monospace" font-size="8" text-anchor="middle">MosEisley (VLAN 50)</text>
 
   <!-- Legend -->
-  <rect x="30" y="218" width="150" height="130" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
-  <text x="105" y="236" fill="#64748b" font-family="monospace" font-size="9" font-weight="bold" text-anchor="middle">LEGEND</text>
-  <rect x="40" y="244" width="10" height="10" rx="2" fill="#3b82f6"/>
-  <text x="56" y="253" fill="#64748b" font-family="monospace" font-size="8">Proxmox host</text>
-  <rect x="40" y="260" width="10" height="10" rx="2" fill="#f97316"/>
-  <text x="56" y="269" fill="#64748b" font-family="monospace" font-size="8">OPNsense VM</text>
-  <rect x="40" y="276" width="10" height="10" rx="2" fill="#8b5cf6"/>
-  <text x="56" y="285" fill="#64748b" font-family="monospace" font-size="8">Managed switch</text>
-  <rect x="40" y="292" width="10" height="10" rx="2" fill="#10b981"/>
-  <text x="56" y="301" fill="#64748b" font-family="monospace" font-size="8">Trusted device</text>
-  <rect x="40" y="308" width="10" height="10" rx="2" fill="#f59e0b"/>
-  <text x="56" y="317" fill="#64748b" font-family="monospace" font-size="8">WiFi AP</text>
-  <line x1="40" y1="330" x2="60" y2="330" stroke="#3b82f6" stroke-width="1.5"/>
-  <text x="66" y="334" fill="#64748b" font-family="monospace" font-size="8">VLAN trunk</text>
+  <rect x="28" y="438" width="148" height="102" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+  <text x="102" y="454" fill="#64748b" font-family="monospace" font-size="8" font-weight="bold" text-anchor="middle">LEGEND</text>
+  <rect x="38" y="461" width="9" height="9" rx="2" fill="#3b82f6"/>
+  <text x="53" y="469" fill="#64748b" font-family="monospace" font-size="7.5">Proxmox host</text>
+  <rect x="38" y="475" width="9" height="9" rx="2" fill="#f97316"/>
+  <text x="53" y="483" fill="#64748b" font-family="monospace" font-size="7.5">OPNsense VM</text>
+  <rect x="38" y="489" width="9" height="9" rx="2" fill="#8b5cf6"/>
+  <text x="53" y="497" fill="#64748b" font-family="monospace" font-size="7.5">Managed switch</text>
+  <rect x="38" y="503" width="9" height="9" rx="2" fill="#10b981"/>
+  <text x="53" y="511" fill="#64748b" font-family="monospace" font-size="7.5">Trusted device</text>
+  <rect x="38" y="517" width="9" height="9" rx="2" fill="#f59e0b"/>
+  <text x="53" y="525" fill="#64748b" font-family="monospace" font-size="7.5">WiFi AP</text>
 
-  <!-- Proxmox management note -->
-  <text x="105" y="420" fill="#1d4ed8" font-family="monospace" font-size="8" text-anchor="middle">Proxmox mgmt:</text>
-  <text x="105" y="432" fill="#1d4ed8" font-family="monospace" font-size="8" text-anchor="middle">10.0.10.10:8006</text>
+  <!-- Note: archives is a VM -->
+  <rect x="28" y="548" width="148" height="52" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+  <text x="102" y="564" fill="#334155" font-family="monospace" font-size="7" text-anchor="middle">archives (TrueNAS)</text>
+  <text x="102" y="575" fill="#334155" font-family="monospace" font-size="7" text-anchor="middle">runs as VM on executor</text>
+  <text x="102" y="586" fill="#334155" font-family="monospace" font-size="7" text-anchor="middle">HDD controller passthrough</text>
+  <text x="102" y="597" fill="#1e3a5f" font-family="monospace" font-size="7" text-anchor="middle">no physical switch port</text>
 </svg>
