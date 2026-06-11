@@ -75,7 +75,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 
 | Hostname | Role | Specs |
 |----------|------|-------|
-| executor | Proxmox hypervisor | i7, 64GB DDR4, 1TB NVMe, 6×4TB HDD, GPU, 3× NICs |
+| executor | Proxmox hypervisor | i7 7700T, 64GB DDR4, 512GB NVMe, 2x512GB SSD, 8×4TB HDD, GPU, 2× NICs |
 | tarkin | OPNsense firewall (VM) | VM on executor |
 | archives | TrueNAS SCALE (VM) | VM on executor, HDD controller passthrough |
 | death-star | Core switch | ZX-SWTGW215AS, 8-port 2.5G managed |
@@ -92,15 +92,15 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 | VM ID | Hostname | OS | Role | VLAN | Status |
 |-------|----------|----|------|------|--------|
 | 100 | tarkin | OPNsense 26.1.6 | Firewall, DHCP, DNS | All | ✅ Running |
-| 101 | phantom | Ubuntu | Tailscale exit node | 30 | ✅ Running |
-| 103 | shipyard | Ubuntu Server | Docker, Portainer, Crafty | 30 | Phase 2 |
+| 101 | phantom | Ubuntu | Tailscale exit node | 30 |
+| 102 | archives | TrueNAS SCALE | NAS (HDD passthrough) | 30 | Phase 2 |
+| 103 | shipyard | Ubuntu Server 24.04 LTS | Docker, Portainer, Crafty | 30 | ✅ Running |
 | 104 | order66 | — | Pi-hole DNS | 30 | Phase 3 |
 | 105 | inquisitor | — | Wazuh SIEM | 30 | Phase 6 |
 | 106 | cantina | — | Jellyfin | 30 | Phase 4 |
 | 107 | vault | — | Nextcloud | 30 | Phase 5 |
 | 108 | maul | Kali Linux | Pentesting | 60 | Phase 7 |
 | 109 | rogue | — | Vulnerable VM | 60 | Phase 7 |
-| — | archives | TrueNAS SCALE | NAS (HDD passthrough) | 30 | Phase 2 |
 
 ---
 
