@@ -51,12 +51,12 @@ boot controller.
 | Portainer deployed | ✅ | https://10.0.30.25:9443 |
 | Crafty Controller deployed | ✅ | https://10.0.30.25:8443 |
 | Minecraft world migrated |✅ | World files at C:\minecraft_backup\ on falcon |
-| Minecraft port forward configured | ⬜ | OPNsense NAT + senate forward |
+| Minecraft port forward configured | ✅ | OPNsense NAT + senate forward |
 | archives VM created | ⬜ | TrueNAS SCALE, HDD controller passthrough |
 | ZFS pool configured | ⬜ | 8×4TB — RAIDZ2 (~24TB usable) |
 | NFS/SMB shares configured | ⬜ | |
-| SSD storage plan implemented | ⬜ | VM backups + dedicated inquisitor storage |
-| Proxmox scheduled VM backups | ⬜ | Datacenter → Backup |
+| SSD storage plan implemented | ✅ | VM backups + dedicated inquisitor storage |
+| Proxmox scheduled VM backups | ✅ | Datacenter → Backup |
 
 ---
 
@@ -141,3 +141,24 @@ world via Crafty's zip import. Server running locally on 10.0.30.25:25565.
 
 Corrected hardware documentation: executor has 512GB NVMe (not 1TB), 2× spare 512GB
 SSDs, and 8× 4TB HDDs (not 6). Storage plan revised accordingly.
+
+### 2026-06-22 — Minecraft port forward, firewall fixes, SSD storage, scheduled backups
+
+Configured Minecraft port forward for external access. Added Destination NAT rule on
+tarkin (OPNsense) forwarding WAN:25565 → 10.0.30.25:25565 with associated filter rule.
+Added matching port forward on senate (Asus GT-AX11000) forwarding external 25565 →
+192.168.1.100:25565. Verified external connectivity — server reachable via public IP.
+
+Fixed FAMILY and IOTGUEST firewall rules. Both VLANs had a broad block rule covering
+10.0.0.0/16 which was also blocking DNS queries to the VLAN gateway (10.0.40.1 and
+10.0.50.1 respectively). Added explicit pass rules above each block rule allowing TCP/UDP
+port 53 to the gateway. Internet access and app functionality restored on both networks.
+
+Registered two 512GB SSDs as Proxmox storage targets. Both drives had existing NTFS
+partitions from prior use — wiped via pve → Disks → Wipe Disk before formatting.
+Used pve → Disks → Directory → Create (ext4) for both:
+- /dev/sdc (Samsung 860 EVO) → ssd-backups — content: Backup + general
+- /dev/sdd (Crucial BX200) → ssd-inquisitor — content: Disk image (reserved for Wazuh)
+
+Configured scheduled VM backups: Datacenter → Backup → nightly 2:00, all VMs, ssd-backups
+target, snapshot mode, zstd compression, 7-backup rolling retention.

@@ -61,52 +61,64 @@ dnsmasq holds port 67 and silently blocks Kea from binding.
 
 ---
 
-## Firewall Rules
+## Firewall Rules (Rules [new] — post Phase 2)
 
-Rules are configured in **Firewall → Rules** (legacy interface).
-All rules use Direction: `in`, Protocol: any (unless specified), Action as noted.
+Rules are evaluated top-down, first match wins. Order within each interface matters.
 
-### TRUSTED
-| # | Action | Source | Destination | Description |
-|---|--------|--------|-------------|-------------|
-| 1 | Pass | TRUSTED net | any | Trusted full access |
+### TRUSTED (VLAN 20)
+| Action | Source | Destination | Port | Notes |
+|--------|--------|-------------|------|-------|
+| pass | TRUSTED net | any | any | Full internet + homelab access |
 
-### SERVERS
-| # | Action | Source | Destination | Description |
-|---|--------|--------|-------------|-------------|
-| 1 | Block | SERVERS net | TRUSTED net | Servers cannot reach trusted devices |
-| 2 | Pass | SERVERS net | any | Servers reach internet |
+### SERVERS (VLAN 30)
+| Action | Source | Destination | Port | Notes |
+|--------|--------|-------------|------|-------|
+| block | SERVERS net | TRUSTED net | any | Servers cannot reach client devices |
+| pass | SERVERS net | any | any | Internet access allowed |
 
-### FAMILY
-| # | Action | Source | Destination | Description |
-|---|--------|--------|-------------|-------------|
-| 1 | Block | FAMILY net | 10.0.0.0/16 | Family cannot reach homelab |
-| 2 | Pass | FAMILY net | any | Family internet access |
+### FAMILY (VLAN 40)
+| Action | Source | Destination | Port | Notes |
+|--------|--------|-------------|------|-------|
+| pass | FAMILY net | 10.0.40.1 | 53 | Allow DNS to gateway — must be above block |
+| block | FAMILY net | 10.0.0.0/16 | any | Block all homelab access |
+| pass | FAMILY net | any | any | Internet access allowed |
 
-### IOTGUEST
-| # | Action | Source | Destination | Description |
-|---|--------|--------|-------------|-------------|
-| 1 | Block | IOTGUEST net | 10.0.0.0/16 | IoT cannot reach homelab |
-| 2 | Pass | IOTGUEST net | any | IoT internet only |
+### IOTGUEST (VLAN 50)
+| Action | Source | Destination | Port | Notes |
+|--------|--------|-------------|------|-------|
+| pass | IOTGUEST net | 10.0.50.1 | 53 | Allow DNS to gateway — must be above block |
+| block | IOTGUEST net | 10.0.0.0/16 | any | Block all homelab access |
+| pass | IOTGUEST net | any | any | Internet access allowed |
 
-### SECLAB
-| # | Action | Source | Destination | Description |
-|---|--------|--------|-------------|-------------|
-| 1 | Block | SECLAB net | 10.0.0.0/16 | Lab fully isolated |
-| 2 | Pass | SECLAB net | any | Lab reaches internet for tools |
+### SECLAB (VLAN 60)
+| Action | Source | Destination | Port | Notes |
+|--------|--------|-------------|------|-------|
+| block | SECLAB net | 10.0.0.0/16 | any | Fully isolated from homelab |
+| pass | SECLAB net | any | any | Internet access allowed |
 
-### MGMT
-| # | Action | Source | Destination | Description |
-|---|--------|--------|-------------|-------------|
-| 1 | Block | MGMT net | TRUSTED net | MGMT blocked from trusted |
-| 2 | Pass | MGMT net | any | MGMT devices reach internet |
+### MGMT (VLAN 10)
+| Action | Source | Destination | Port | Notes |
+|--------|--------|-------------|------|-------|
+| block | MGMT net | TRUSTED net | any | Management cannot reach client devices |
+| pass | MGMT net | any | any | Internet + homelab infrastructure access |
 
 ### WAN
-- Block private networks: **DISABLED** (tarkin's WAN faces senate LAN, not internet)
-- Block bogon networks: **ENABLED**
-- Pass rule: `192.168.1.0/24 → 10.0.0.0/16` (house devices can reach homelab via static route)
+| Action | Source | Destination | Port | Notes |
+|--------|--------|-------------|------|-------|
+| pass | 192.168.1.0/24 | 10.0.0.0/16 | any | Senate LAN → homelab (static route traffic) |
 
----
+### NAT (Destination NAT)
+| Interface | Destination | Port | Target | Notes |
+|-----------|-------------|------|--------|-------|
+| WAN | WAN address | 25565 | 10.0.30.25:25565 | Minecraft → shipyard/Crafty |
+
+### Design Notes
+- FAMILY and IOTGUEST DNS fix: the broad 10.0.0.0/16 block was silently dropping DNS
+  queries to the VLAN gateway. Explicit port 53 pass rules added above each block rule.
+- WAN block private networks is DISABLED — tarkin's WAN faces senate (192.168.1.0/24),
+  not the internet directly, so blocking RFC1918 would cut off house network access.
+- SECLAB has no DNS exception unlike FAMILY/IOTGUEST — lab VMs use static IPs and
+  the isolation is intentional and total.
 
 ## Emergency Access
 
