@@ -1,7 +1,7 @@
 # The Galaxy — Network & Security Home Lab
 
 A production-grade homelab built by a cybersecurity student (Marist University, class of
-2026) to develop and demonstrate blue team skills: network defense, segmentation,
+2027) to develop and demonstrate blue team skills: network defense, segmentation,
 SIEM, log analysis, and vulnerability management.
 
 > **AI-assisted workflow:** This project is built with Claude (Anthropic) as an AI pair
@@ -46,8 +46,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
                    │ VLAN trunk
                death-star (ZX-SWTGW215AS 2.5G managed switch)
                ├── Port 2: falcon (access, VLAN 20)
-               ├── Port 3: holonet (trunk, VLANs 20/40/50)
-               └── Port 5: archives (access, VLAN 30)
+               └── Port 3: holonet (trunk, VLANs 20/40/50)
 ```
 
 ### VLAN Segmentation
@@ -75,7 +74,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 
 | Hostname | Role | Specs |
 |----------|------|-------|
-| executor | Proxmox hypervisor | i7 7700T, 64GB DDR4, 512GB NVMe, 2x512GB SSD, 8×4TB HDD, GPU, 2× NICs |
+| executor | Proxmox hypervisor | i7 7700T, 64GB DDR4, 512GB NVMe, 2x512GB SSD, 12×4TB HDD (6 SATA + 6 SAS), GPU, 2× NICs |
 | tarkin | OPNsense firewall (VM) | VM on executor |
 | archives | TrueNAS SCALE (VM) | VM on executor, HDD controller passthrough |
 | death-star | Core switch | ZX-SWTGW215AS, 8-port 2.5G managed |
@@ -92,8 +91,8 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 | VM ID | Hostname | OS | Role | VLAN | Status |
 |-------|----------|----|------|------|--------|
 | 100 | tarkin | OPNsense 26.1.6 | Firewall, DHCP, DNS | All | ✅ Running |
-| 101 | phantom | Ubuntu | Tailscale exit node | 30 |
-| 102 | archives | TrueNAS SCALE | NAS (HDD passthrough) | 30 | Phase 2 |
+| 101 | phantom | Ubuntu (rebuild pending) | Tailscale exit node | 30 | ⬜ Not running |
+| 102 | archives | TrueNAS SCALE | NAS (dual-controller passthrough) | 30 | ✅ Running |
 | 103 | shipyard | Ubuntu Server 24.04 LTS | Docker, Portainer, Crafty | 30 | ✅ Running |
 | 104 | order66 | — | Pi-hole DNS | 30 | Phase 3 |
 | 105 | inquisitor | — | Wazuh SIEM | 30 | Phase 6 |
@@ -109,7 +108,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 | Phase | Focus | Status |
 |-------|-------|--------|
 | **1** | Core network — OPNsense, VLANs, managed switch, WiFi AP | ✅ Complete |
-| **2** | Docker services (shipyard), Crafty/Minecraft, TrueNAS VM | 🔄 In Progress |
+| **2** | Docker services (shipyard), Crafty/Minecraft, TrueNAS VM | ✅ Complete |
 | **3** | Pi-hole DNS filtering + Tailscale remote access | ⬜ |
 | **4** | Jellyfin media server with GPU transcoding | ⬜ |
 | **5** | Nextcloud file server | ⬜ |

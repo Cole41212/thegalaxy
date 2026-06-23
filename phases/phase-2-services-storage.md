@@ -4,7 +4,7 @@
 TrueNAS storage VM with HDD passthrough, and firewall rules migration. Establish the
 server infrastructure that all future phases depend on.
 
-**Status:** 🔄 In Progress
+**Status:** ✅ In Progress
 
 ---
 
@@ -34,9 +34,18 @@ Proxmox's virtualization layer breaks this. Passing through the entire HBA/SATA
 controller gives TrueNAS the same direct hardware access it would have on bare metal,
 while keeping it isolated as a VM.
 
-A separate HBA card (LSI 9207-8i or similar) is required so the SATA controller for
-the 6 HDDs can be passed through independently without also passing through the NVMe
-boot controller.
+The 12 HDDs are split across two controllers — a PCIe SATA controller (6 drives) and
+a SAS HBA (6 drives) — both separate from the motherboard SATA controller that holds
+the SSDs and the M.2 NVMe boot drive. Both the SATA and SAS controllers are passed
+through whole to archives, giving TrueNAS direct hardware control of all 12 drives,
+while Proxmox keeps full ownership of its own drives. A controller cannot be split
+between host and guest, so this physical separation is what makes the passthrough clean.
+The 12 HDDs are split across two controllers — a PCIe SATA controller (6 drives) and a 
+SAS HBA (6 drives) — both separate from the motherboard SATA controller that holds the SSDs 
+and the M.2 NVMe boot drive. Both the SATA and SAS controllers are passed through whole to 
+archives, giving TrueNAS direct hardware control of all 12 drives, while Proxmox keeps full 
+ownership of its own drives. A controller cannot be split between host and guest, 
+so this physical separation is what makes the passthrough clean.
 
 ---
 
@@ -45,16 +54,18 @@ boot controller.
 | Step | Status | Notes |
 |------|--------|-------|
 | Firewall rules migrated to Rules [new] | ✅ | Migration assistant in OPNsense |
-| LSI HBA card installed | ⬜ | For HDD passthrough to TrueNAS VM |
+| Storage controllers identified + IOMMU isolation verified | ✅ | SATA + SAS controllers |
 | shipyard VM created (ID 103) | ✅ | Ubuntu Server, VLAN 30 |
 | Docker installed on shipyard | ✅ | |
 | Portainer deployed | ✅ | https://10.0.30.25:9443 |
 | Crafty Controller deployed | ✅ | https://10.0.30.25:8443 |
 | Minecraft world migrated |✅ | World files at C:\minecraft_backup\ on falcon |
 | Minecraft port forward configured | ✅ | OPNsense NAT + senate forward |
-| archives VM created | ⬜ | TrueNAS SCALE, HDD controller passthrough |
-| ZFS pool configured | ⬜ | 8×4TB — RAIDZ2 (~24TB usable) |
-| NFS/SMB shares configured | ⬜ | |
+| archives VM created | ✅ | TrueNAS SCALE, HDD controller passthrough |
+| ZFS pool configured | ✅ | 12×4TB — 2× 6-drive RAIDZ2 (~29 TiB usable) |
+| NFS/SMB shares configured | ✅ | |
+| archives PCIe passthrough (both controllers) | ✅ | Raw Device + All Functions + PCIe |
+| TrueNAS static IP 10.0.30.20 | ✅ | + Kea reservation |
 | SSD storage plan implemented | ✅ | VM backups + dedicated inquisitor storage |
 | Proxmox scheduled VM backups | ✅ | Datacenter → Backup |
 
@@ -69,21 +80,31 @@ boot controller.
 | 512GB NVMe (Samsung 970 EVO) | Proxmox OS + all VM system disks (465GB usable) |
 | 512GB SSD #1 | VM backup target (Proxmox Datacenter → Backup) |
 | 512GB SSD #2 | inquisitor (Wazuh) dedicated log/data disk |
-| 8× 4TB HDD → TrueNAS | RAIDZ2 pool (~24TB usable) — media, files, bulk data |
+| 12× 4TB HDD → TrueNAS | 2× 6-drive RAIDZ2 (~29 TiB usable) — media, files, bulk data |
 
 NVMe constraint: keep VM system disks lean. VMs that store bulk data (cantina, vault,
 archives) keep only OS + application on NVMe; actual data lives on TrueNAS via NFS.
 
-### LSI HBA for TrueNAS passthrough
-The 8×4TB WD HDDs need to connect through a separate HBA passed through to the TrueNAS
-VM as a PCIe device. Do NOT use the motherboard SATA controller if it also hosts the
-NVMe boot drive — you cannot split a controller between the host and a VM.
+### Storage Controller Passthrough for TrueNAS
+The 12×4TB HDDs connect via two controllers, both passed through to archives:
+- PCIe SATA controller — 6 drives
+- SAS HBA — 6 drives
 
-Recommended: LSI 9207-8i or LSI 9211-8i (~$30–40 used on eBay).
-These are standard IT-mode HBAs with excellent TrueNAS compatibility.
+The 2×512GB SSDs and the M.2 NVMe boot drive stay on the motherboard SATA controller,
+owned by Proxmox. A controller can't be shared between host and guest.
+
+Controller note: the SAS HBA is the ideal controller for ZFS (direct drive access,
+clean SMART passthrough). The PCIe SATA card is a multi-port consumer controller — it
+works, but monitor SMART data and watch for dropped drives during the first full scrub.
+If reliability issues appear under load, consolidating onto LSI HBAs (IT mode) is the
+upgrade path.
 
 ### ZFS Pool Design
-8×4TB drives in RAIDZ2: ~24TB usable, tolerates any 2 simultaneous drive failures.
+12×4TB drives as 2× 6-drive RAIDZ2 vdevs striped into one pool.
+- Each vdev: 4 data + 2 parity; each tolerates 2 simultaneous failures.
+- Usable: ≈32 TB raw / ~29 TiB after ZFS overhead.
+- Chosen over a single 12-wide RAIDZ2 for faster resilvers (a rebuild only reads the
+  affected 6-drive vdev, not all 12) and better IOPS (2 vdevs ≈ 2× the write throughput).
 ---
 
 ## shipyard VM Spec
@@ -112,18 +133,39 @@ Services:
 |---------|-------|
 | Hostname | archives |
 | OS | TrueNAS SCALE |
-| Boot disk | 16GB minimum, local-lvm |
+| Boot disk | 32GB, local-lvm |
 | CPU | 2 cores, host type |
-| RAM | 8192MB (ZFS ARC cache) |
+| RAM | 16384MB (ZFS ARC; ballooning OFF) |
 | Network | vmbr1, VLAN tag 30, VirtIO |
-| Storage | HBA PCIe passthrough |
+| Storage | SATA + SAS controllers via PCIe passthrough — 12× 4TB |
+| Machine | q35 (required for PCIe passthrough) |
+| BIOS | OVMF (UEFI) + EFI disk |
 | IP | 10.0.30.20 (DHCP reservation) |
 
----
+## Storage Pool & Shares
+
+Pool: `holocron` ← confirm — 2× 6-drive RAIDZ2 vdevs, unencrypted root.
+- ≈32 TB raw / ~29 TiB usable; each vdev tolerates 2 simultaneous drive failures.
+- Two 6-drive vdevs rather than one 12-wide: faster resilvers (only the affected vdev
+  is read) and ~2× write throughput.
+
+Drives: 6 SATA on the ASM1064, 6 SAS on the SAS3008 — both controllers passed through.
+
+| Dataset | Preset | Purpose |
+|---------|--------|---------|
+| media | Generic | cantina / Jellyfin (Phase 4) |
+| files | Generic | vault / Nextcloud (Phase 5) |
+| crafty-backups | Generic | shipyard Minecraft backups |
+| vm-backups | Generic | Proxmox overflow backups |
+
+NFS shares: one per dataset, allowed network scoped to 10.0.30.0/24.
+Data Protection: periodic snapshots on media + files; default weekly scrub enabled.
 
 ## Log
 
 ### 2026-06-09 — Phase 2 started
+
+Phase 2 started.
 
 ### 2026-06-11 — Phase 2 partial: firewall migration + shipyard + Crafty
 
@@ -162,3 +204,48 @@ Used pve → Disks → Directory → Create (ext4) for both:
 
 Configured scheduled VM backups: Datacenter → Backup → nightly 2:00, all VMs, ssd-backups
 target, snapshot mode, zstd compression, 7-backup rolling retention.
+
+### 2026-06-22 — archives TrueNAS VM + dual-controller passthrough (Phase 2 complete)
+
+Corrected drive count to 12× 4TB: 6 SATA (2× Seagate ST4000DM005 CMR, 2× WD Black
+WD4003FZEX, 1× WD Red WD40EFRX, 1× Toshiba HDWE140) on the ASM1064, and 6 SAS
+(incl. 2× HGST HUS724040ALS640) on the SAS3008. All CMR.
+
+Verified IOMMU enabled by default (PVE 9 / kernel 6.x). Identified controllers via
+`pvesh get /nodes/pve/hardware/pci`: ASM1064 SATA at 05:00.0 (IOMMU group 15), SAS3008
+at 06:00.0 (group 16) — each isolated, clear of the NVMe and motherboard SATA controller.
+
+Created archives VM (ID 102): q35 + OVMF, 32GB boot disk, 2 cores host, 16GB RAM
+(ballooning off), VLAN 30. Passed through both controllers via GUI
+(Raw Device + All Functions + PCI-Express). Installed TrueNAS SCALE, static IP 10.0.30.20.
+Built pool 'holocron' as 2× 6-drive RAIDZ2 (~29 TiB), datasets media/files/crafty-backups/
+vm-backups with NFS shares scoped to 10.0.30.0/24. Excluded archives from the vzdump job
+(pool protected by RAIDZ2 + ZFS snapshots + weekly scrub).
+
+#### Issue: TrueNAS installer blocked at boot — "Access Denied" on the DVD-ROM
+**Root cause:** The EFI disk was created with `pre-enrolled-keys=1`, so OVMF booted with
+Secure Boot enforcing. The TrueNAS installer isn't signed with Microsoft's keys, and
+TrueNAS doesn't support Secure Boot, so UEFI rejected it.
+**Fix:** Removed and recreated the EFI disk with "Pre-Enroll keys" unchecked → Secure
+Boot off → installer loaded.
+**Learning:** For OVMF VMs running OSes that don't support Secure Boot (TrueNAS, many
+appliances), create the EFI disk without pre-enrolled keys.
+
+#### Issue: noVNC console rendered as colored static during install
+**Root cause:** Cosmetic framebuffer rendering glitch when TrueNAS switches display mode
+under OVMF + default display in noVNC. Installer was running fine underneath.
+**Fix:** Reopened the console / forced a repaint. (Switching the Display type also works.)
+**Learning:** Garbled noVNC output during a mode switch is a rendering artifact, not a
+crash — repaint or change display type rather than assuming install failure.
+
+#### Issue: only 8 of 12 drives visible in TrueNAS
+**Root cause:** One of the two SFF-8643 (mini-SAS HD) breakout cables on the SAS3008 was
+not fully seated. The affected SAS drives had power (all spinning) but no data path, so
+they never reached the controller. Power and data are separate connections on SAS drives.
+**Diagnosis:** Decoded drive serials to confirm all 6 SATA drives present and the SAS side
+short; `lspci` confirmed the SAS3008 itself initialized and was presenting some drives, so
+the controller and passthrough were fine — narrowed it to per-cable seating.
+**Fix:** Reseated the SFF-8643 cable at the card; all 12 drives appeared.
+**Learning:** A spinning drive that doesn't enumerate is almost always a data-cable, not a
+power, problem. When a controller shows *some* of its drives, suspect a specific cable, not
+the controller or the passthrough.
