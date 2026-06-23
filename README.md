@@ -58,7 +58,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 | 30 | Servers | 10.0.30.0/24 | VMs and NAS | ✅ | No access to Trusted |
 | 40 | Family | 10.0.40.0/24 | Family devices | ✅ | Fully blocked |
 | 50 | IoT/Guest | 10.0.50.0/24 | Smart devices, guests | ✅ | Fully blocked |
-| 60 | Security Lab | 10.0.60.0/24 | Kali + vulnerable VMs | ✅ | Fully blocked |
+| 60 | Security Lab | 10.0.60.0/24 | scout (attack laptop) + rogue (vulnerable VM) | ✅ | Fully blocked |
 
 ### WiFi Networks
 
@@ -98,8 +98,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 | 105 | inquisitor | — | Wazuh SIEM | 30 | Phase 6 |
 | 106 | cantina | — | Jellyfin | 30 | Phase 4 |
 | 107 | vault | — | Nextcloud | 30 | Phase 5 |
-| 108 | maul | Kali Linux | Pentesting | 60 | Phase 7 |
-| 109 | rogue | — | Vulnerable VM | 60 | Phase 7 |
+| 108 | rogue | — | Vulnerable VM (isolated, no internet) | 60 | Phase 7 |
 
 ---
 
@@ -131,13 +130,23 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 
 ```
 thegalaxy/
-├── README.md                    ← this file
-├── network/
-│   ├── diagrams/                ← SVG network diagrams
-│   └── ip-scheme.md             ← VLAN table and static IP assignments
+├── README.md                         ← portfolio front page
+├── docs/                             ← NEW: system-wide reference (source of truth)
+│   ├── hardware-inventory.md            (Step 3)
+│   ├── backup-strategy.md               (Step 3)
+│   ├── telemetry-logging.md             (Step 3)
+│   └── threat-model.md                  (Step 3)
+├── decisions/                        ← NEW: ADRs (one decision per file)
+│   └── 0001-…                           (Step 3)
+├── network/                          ← networking domain
+│   ├── diagrams/                        (existing SVGs)
+│   ├── ip-scheme.md                     (existing — fix IPs this commit)
+│   ├── firewall-rules.md                (Step 3 — relocate/author here)
+│   └── dns-design.md                    (Step 3)
 ├── phases/
-│   ├── phase-1-core-network.md  ← decisions, architecture, build log
-│   └── phase-N-*.md
-├── runbooks/                    ← step-by-step operational procedures
-└── assets/                      ← screenshots, config exports
+│   ├── phase-1-core-network.md          (renamed this commit)
+│   └── phase-2-services-storage.md
+├── runbooks/                            (flesh out Step 4)
+├── config-backups/                   ← NEW: OPNsense XML, switch export (Step 6)
+└── assets/
 ```

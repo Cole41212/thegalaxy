@@ -1,0 +1,3 @@
+# docs/ — System-wide reference
+Source-of-truth reference for hardware, backups, telemetry, and the threat model.
+Network-specific reference lives in /network. Per-phase build logs live in /phases.
