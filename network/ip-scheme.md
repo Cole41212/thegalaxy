@@ -44,7 +44,7 @@ DHCP pools begin at `.100` to avoid conflicts.
 | order66 | Pi-hole | 10.0.30.53 | DNS :53, Web UI :80 |
 | cantina | Jellyfin | 10.0.30.50 | Media server :8096 |
 | vault | Nextcloud | 10.0.30.40 | File server :443 |
-| inquisitor | Wazuh SIEM | 10.0.30.100 | SIEM dashboard :443 |
+| inquisitor | Wazuh SIEM | 10.0.30.60 | SIEM dashboard :443 |
 
 ### Trusted Devices (VLAN 20)
 
@@ -59,7 +59,7 @@ DHCP pools begin at `.100` to avoid conflicts.
 | Hostname | Role | IP | Notes |
 |----------|------|----|-------|
 | maul | Kali Linux | 10.0.60.10 | DHCP reservation |
-| rogue | Vulnerable VM | 10.0.60.100 | DHCP reservation, fully isolated |
+| rogue | Vulnerable VM | 10.0.60.50 | DHCP reservation, fully isolated |
 
 ---
 

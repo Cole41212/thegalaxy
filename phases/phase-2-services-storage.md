@@ -4,7 +4,7 @@
 TrueNAS storage VM with HDD passthrough, and firewall rules migration. Establish the
 server infrastructure that all future phases depend on.
 
-**Status:** ✅ In Progress
+**Status:** ✅ Complete
 
 ---
 
@@ -40,12 +40,6 @@ the SSDs and the M.2 NVMe boot drive. Both the SATA and SAS controllers are pass
 through whole to archives, giving TrueNAS direct hardware control of all 12 drives,
 while Proxmox keeps full ownership of its own drives. A controller cannot be split
 between host and guest, so this physical separation is what makes the passthrough clean.
-The 12 HDDs are split across two controllers — a PCIe SATA controller (6 drives) and a 
-SAS HBA (6 drives) — both separate from the motherboard SATA controller that holds the SSDs 
-and the M.2 NVMe boot drive. Both the SATA and SAS controllers are passed through whole to 
-archives, giving TrueNAS direct hardware control of all 12 drives, while Proxmox keeps full 
-ownership of its own drives. A controller cannot be split between host and guest, 
-so this physical separation is what makes the passthrough clean.
 
 ---
 
