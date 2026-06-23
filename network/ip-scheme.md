@@ -40,7 +40,7 @@ DHCP pools begin at `.100` to avoid conflicts.
 | Hostname | Role | IP | Services |
 |----------|------|----|----------|
 | archives | TrueNAS SCALE | 10.0.30.20 | NFS, SMB, storage |
-| shipyard | Docker host | 10.0.30.25 | Portainer :9443, Crafty :8000/:8443 |
+| shipyard | Docker host | 10.0.30.25 | Portainer :9443, Crafty :8443, Minecraft :25565 |
 | order66 | Pi-hole | 10.0.30.53 | DNS :53, Web UI :80 |
 | cantina | Jellyfin | 10.0.30.50 | Media server :8096 |
 | vault | Nextcloud | 10.0.30.40 | File server :443 |
