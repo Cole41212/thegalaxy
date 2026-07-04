@@ -1,0 +1,5 @@
+# Device configs contain secrets — keep local/offsite, never public
+config-backups/*
+!config-backups/README.md
+# Claude Code — share rules/skills, keep personal prefs local
+.claude/CLAUDE.local.md

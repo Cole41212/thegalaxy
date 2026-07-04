@@ -1,13 +1,16 @@
 # The Galaxy — Network & Security Home Lab
 
-A production-grade homelab built by a cybersecurity student (Marist University, class of
+An enterprise-style homelab built by a cybersecurity student (Marist University, class of
 2027) to develop and demonstrate blue team skills: network defense, segmentation,
 SIEM, log analysis, and vulnerability management.
 
-> **AI-assisted workflow:** This project is built with Claude (Anthropic) as an AI pair
-> programmer and documentation partner. Leveraging AI to accelerate learning, diagnose
-> complex issues, and produce professional documentation is an intentional skill. All
-> configurations are applied and verified on real hardware by the project owner.
+> **AI-assisted workflow:** Built with Claude (Anthropic) as a pair programmer and
+> documentation partner — a deliberate, modern engineering practice. I make the
+> architecture decisions and do all hands-on configuration and verification on real
+> hardware; AI accelerates research, sanity-checks designs, and produces documentation.
+> The build logs preserve the reasoning, including faults I diagnosed independently —
+> tracing four missing drives to a single unseated SAS breakout cable via serial-number
+> analysis, and a lab-wide DNS outage to firewall rule ordering.
 
 ---
 
@@ -24,7 +27,7 @@ configurations on real hardware.
 ---
 
 ## Architecture
-![Network Topology](network/diagrams/phase1-topology.svg)
+![Network Topology](network/diagrams/current-topology.svg)
 ![VLAN Architecture](network/diagrams/vlan-architecture.svg)
 ### Network Topology
 
@@ -102,6 +105,10 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 
 ---
 
+## Design Goals & Threat Model
+Built around four principles: contain blast radius, least privilege between zones,
+visibility, and recoverability. Full write-up: [docs/threat-model.md](docs/threat-model.md).
+
 ## Phases
 
 | Phase | Focus | Status |
@@ -112,41 +119,41 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 | **4** | Jellyfin media server with GPU transcoding | ⬜ |
 | **5** | Nextcloud file server | ⬜ |
 | **6** | Wazuh SIEM + dashboard displays | ⬜ |
-| **7** | Security lab — Kali + vulnerable VM | ⬜ |
+| **7** | Security lab — scout (attack laptop) + rogue (isolated vulnerable VM) | ⬜ |
 | **8** | AI tools + portfolio website | ⬜ |
 
 ---
 
-## Skills Demonstrated
-
-`Network segmentation` `VLAN design` `802.1Q trunking` `Firewall policy`
-`OPNsense` `Proxmox VE` `Kea DHCPv4` `Unbound DNS` `Managed switch configuration`
-`Static routing` `Asymmetric routing diagnosis` `Docker` `TrueNAS` `Wazuh SIEM`
-`Pi-hole` `Tailscale` `Kali Linux` `AI-assisted engineering workflow`
-
+## Skills by Phase
+| Phase | Skills |
+|---|---|
+| 1 | VLAN design · 802.1Q trunking · OPNsense · Kea DHCP · static routing · asymmetric-routing diagnosis · managed switch config |
+| 2 | Proxmox VE · Docker · TrueNAS/ZFS · PCIe controller passthrough · IOMMU isolation · RAIDZ2 · NFS |
+| 3 | Pi-hole · recursive Unbound · Tailscale · firewall policy · 3-2-1 backup |
+| 4 | GPU passthrough · Jellyfin hardware transcode |
+| 5 | Nextcloud · self-hosted file services |
+| 6 | Wazuh SIEM · log-pipeline design · detection engineering · dashboards |
+| 7 | Attack/defend range · vulnerability management · network isolation |
+| 8 | Cloudflare Tunnel · DMZ design · automation/scripting |
 ---
 
 ## Repository Structure
 
-```
 thegalaxy/
-├── README.md                         ← portfolio front page
-├── docs/                             ← NEW: system-wide reference (source of truth)
-│   ├── hardware-inventory.md            (Step 3)
-│   ├── backup-strategy.md               (Step 3)
-│   ├── telemetry-logging.md             (Step 3)
-│   └── threat-model.md                  (Step 3)
-├── decisions/                        ← NEW: ADRs (one decision per file)
-│   └── 0001-…                           (Step 3)
-├── network/                          ← networking domain
-│   ├── diagrams/                        (existing SVGs)
-│   ├── ip-scheme.md                     (existing — fix IPs this commit)
-│   ├── firewall-rules.md                (Step 3 — relocate/author here)
-│   └── dns-design.md                    (Step 3)
-├── phases/
-│   ├── phase-1-core-network.md          (renamed this commit)
-│   └── phase-2-services-storage.md
-├── runbooks/                            (flesh out Step 4)
-├── config-backups/                   ← NEW: OPNsense XML, switch export (Step 6)
+├── README.md
+├── CLAUDE.md        ← rules for AI-assisted work in this repo
+├── .claude/skills/  ← repo-audit skill
+├── docs/            ← hardware-inventory, backup-strategy, telemetry-logging, threat-model
+├── decisions/       ← ADRs (numbered, immutable)
+├── network/         ← ip-scheme, firewall-rules, dns-design, diagrams/
+├── phases/          ← per-phase build logs
+├── runbooks/        ← operational procedures
+├── config-backups/  ← (local only — see note; not pushed publicly)
 └── assets/
-```
+
+## Documentation
+- [docs/](docs/) — hardware inventory, backup strategy, telemetry/logging, threat model
+- [decisions/](decisions/) — architecture decision records (ADRs)
+- [network/](network/) — IP scheme, firewall rules, DNS design, diagrams
+- [runbooks/](runbooks/) — operational procedures
+- [phases/](phases/) — per-phase build logs

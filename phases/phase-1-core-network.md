@@ -9,6 +9,8 @@ security lab that cannot reach the real network under any circumstances.
 
 **Duration:** May–June 2026
 
+![Phase 1 Final Topology](../network/diagrams/phase1-topology.svg)
+
 ---
 
 ## Decisions & Rationale
@@ -106,7 +108,7 @@ owner on real hardware.
                 ┌───────────▼──────────────────────┐
                 │         executor                  │
                 │  Proxmox VE 9.1.1               │
-                │  i7, 64GB DDR4, 1TB NVMe         │
+                │  i7, 64GB DDR4, 512GB NVMe       │
                 │  192.168.1.225 / 10.0.10.10     │
                 │  ┌──────────────────────────┐   │
                 │  │  tarkin (VM 100)          │   │
@@ -271,8 +273,8 @@ Three APs tested before finding a working solution:
 repurposed as APs often cannot do this correctly.
 
 ### 2026-05-26 — Hardware migration to new all-in-one PC
-**Context:** Consolidated onto single machine (i7, 64GB DDR4, 1TB NVMe 970 EVO,
-GPU, 6×4TB HDDs, 3× NICs, two 512GB SSDs).
+**Context:** Consolidated onto single machine (i7, 64GB DDR4, 512GB NVMe 970 EVO,
+GPU, 6×4TB HDDs, 2× NICs, two 512GB SSDs).
 **Issue:** After SSD transplant, vmbr0 couldn't come up — interfaces file referenced
 `eno1` (old NIC name). New machine NICs are `enp0s31f6` and `enp1s0`.
 **Fix:** Updated bridge-ports reference in /etc/network/interfaces.

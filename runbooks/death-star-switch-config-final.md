@@ -1,5 +1,11 @@
 # Runbook: death-star Switch VLAN Configuration
 
+> ⚠️ **SAVE TO FLASH BEFORE APPLYING.** Save the config to flash (Tools → Save → Save)
+> BEFORE applying any management-IP or VLAN change. The UI disconnects the instant you
+> apply, and an unsaved config is lost — this has caused a lockout once already
+> (Phase 1 PVID incident). A flash-saved baseline is your recovery point: if the change
+> locks you out, a power cycle reverts to it.
+
 **Device:** ZX-SWTGW215AS (2G05110GSM) 2.5G 8-port managed switch
 **Management IP:** 10.0.10.2 (after configuration)
 **Default IP:** 192.168.2.1 (factory default)

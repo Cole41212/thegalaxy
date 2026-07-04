@@ -64,7 +64,7 @@
   <rect x="60" y="349" width="170" height="7" fill="#450a0a"/>
   <text x="145" y="351" fill="#fca5a5" font-family="monospace" font-size="9" font-weight="bold" text-anchor="middle">VLAN 60 · SECURITY LAB</text>
   <text x="145" y="367" fill="#f87171" font-family="monospace" font-size="9" text-anchor="middle">10.0.60.0/24</text>
-  <text x="145" y="380" fill="#64748b" font-family="monospace" font-size="8" text-anchor="middle">maul (Kali) · rogue (vuln VM)</text>
+  <text x="145" y="380" fill="#64748b" font-family="monospace" font-size="8" text-anchor="middle">scout (attacker) · rogue (vuln VM)</text>
   <text x="145" y="393" fill="#475569" font-family="monospace" font-size="8" text-anchor="middle">→ Fully isolated · ✗ All</text>
 
   <!-- Connection lines - VLAN 10 to tarkin -->

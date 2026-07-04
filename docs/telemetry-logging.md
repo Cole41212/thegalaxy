@@ -28,7 +28,7 @@ has to work with on day one.
 - **ZFS/SMART events** — drive health before failure.
 
 ## Architecture
-    sources → syslog/agents → inquisitor (Wazuh manager + indexer, 10.0.30.100)
+    sources → syslog/agents → inquisitor (Wazuh manager + indexer, 10.0.30.60)
 - Wazuh data/indices on SSD #2 (`ssd-inquisitor`) so log growth never starves the NVMe.
 - Dashboards surfaced on panel-1/panel-2 (Phase 6).
 

@@ -31,6 +31,7 @@ DHCP pools begin at `.100` to avoid conflicts.
 | tarkin | OPNsense firewall | 10.0.10.1 (gateway), 10.0.20.1, etc. | All | Gateway on each VLAN |
 | tarkin | WAN | 192.168.1.100 | — | Static, DHCP reservation on senate |
 | executor | Proxmox hypervisor | 10.0.10.10 | 10 | HTTPS :8006 |
+| executor | Storage leg (vmbr1.30) | 10.0.30.2 | 30 | Direct host↔NAS path for NFS backups (ADR 0009) |
 | executor | House management | 192.168.1.225 | — | Static on senate network |
 | death-star | Managed switch | 10.0.10.2 | 10 | HTTP :80 |
 | holonet | WiFi AP | 10.0.20.3 | 20 | HTTP :80 (management via wired only) |
@@ -51,14 +52,14 @@ DHCP pools begin at `.100` to avoid conflicts.
 | Hostname | Role | IP | Notes |
 |----------|------|----|-------|
 | falcon | Main PC | 10.0.20.10 | DHCP reservation |
-| scout | Laptop | DHCP | Linux Mint Cinnamon |
+| scout | Laptop | DHCP | Linux Mint Cinnamon — moves to VLAN 60 in Phase 7 (ADR 0007) |
 | comlink | iPhone | DHCP | |
 
 ### Security Lab (VLAN 60)
 
 | Hostname | Role | IP | Notes |
 |----------|------|----|-------|
-| maul | Kali Linux | 10.0.60.10 | DHCP reservation |
+| scout | Attack laptop (Linux Mint) | 10.0.60.10 | Phase 7 — moves from VLAN 20 (ADR 0007); DHCP reservation |
 | rogue | Vulnerable VM | 10.0.60.50 | DHCP reservation, fully isolated |
 
 ---

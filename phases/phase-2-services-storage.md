@@ -243,3 +243,29 @@ the controller and passthrough were fine — narrowed it to per-cable seating.
 **Learning:** A spinning drive that doesn't enumerate is almost always a data-cable, not a
 power, problem. When a controller shows *some* of its drives, suspect a specific cable, not
 the controller or the passthrough.
+
+### 2026-06-23 — NFS backup deadlock: tarkin frozen, network down
+#### Issue
+All backup jobs began failing with "could not activate storage 'nas-vmbackups'". VM 100
+(tarkin) console inaccessible; DHCP stopped serving; inter-VLAN routing died. Host
+reachable; tarkin's qemu wedged.
+#### Root cause
+The nightly job wrote tarkin's vzdump archive to nas-vmbackups (NFS on 10.0.30.20). The
+host's only network path to 10.0.30.20 routes through tarkin itself. The NFS write
+stalled → qemu entered uninterruptible I/O sleep → tarkin froze → routing died → NFS
+fully timed out. A self-reinforcing deadlock that cannot self-recover. Kernel log
+confirmed: "nfs: server 10.0.30.20 not responding, timed out". A separate config error
+compounded exposure: the job schedule was set to hourly instead of nightly.
+#### Fix
+Disabled the nas-vmbackups storage entry; force-unmounted the hung mount
+(umount -f -l /mnt/pve/nas-vmbackups — releases the blocked I/O holding qemu);
+hard-stopped and restarted tarkin. Routing and DHCP restored within seconds of boot.
+Backup design corrected in the Phase 2 storage reconfig: infrastructure VMs (100, 102)
+excluded from the NAS job and given a local job on ssd-vmstore; NAS job set to nightly;
+NFS mounted soft so future stalls return I/O errors instead of freezing qemu; host given
+a direct VLAN 30 interface so storage traffic no longer traverses tarkin.
+#### Learning
+Never back up the router through the router — the backup path must not depend on the VM
+being backed up. Infrastructure VMs need backup targets independent of the network they
+serve. Hard NFS mounts turn a storage stall into frozen processes; soft mounts fail
+loudly instead.

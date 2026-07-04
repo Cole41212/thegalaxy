@@ -27,6 +27,10 @@ Two physical NICs serve different purposes:
 - IP: 10.0.10.10/24
 - Static route ensures homelab response traffic routes through tarkin, not senate
 
+`vmbr1.30` gives the host a direct leg on VLAN 30 (10.0.30.2/24) so host↔NAS traffic
+(NFS backup storage) never traverses tarkin — see decisions/0009. The connected /24 is
+more specific than the 10.0.0.0/16 static route, so NAS traffic prefers this interface.
+
 ---
 
 ## /etc/network/interfaces
@@ -63,6 +67,11 @@ iface vmbr1.10 inet static
         address 10.0.10.10/24
         post-up ip route add 10.0.0.0/16 via 10.0.10.1
         pre-down ip route del 10.0.0.0/16 via 10.0.10.1
+
+# Storage leg on VLAN 30 — direct host<->NAS path, no gateway (ADR 0009)
+auto vmbr1.30
+iface vmbr1.30 inet static
+        address 10.0.30.2/24
 
 source /etc/network/interfaces.d/*
 ```

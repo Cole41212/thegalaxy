@@ -11,8 +11,12 @@ This protects against drive failure only — it is NOT a backup (ransomware, fat
 deletes, and pool corruption all replicate instantly).
 
 ### 2. Local backups — convenience + space (same site)
-- **VM backups:** nightly Proxmox vzdump → TrueNAS `vm-backups` dataset (NFS). Large,
-  cheap space on RAIDZ2.
+- **Service VM backups:** nightly Proxmox vzdump → TrueNAS `vm-backups` dataset (NFS,
+  soft mount). Large, cheap space on RAIDZ2.
+- **Infrastructure VM backups (tarkin 100, archives 102):** nightly vzdump → `ssd-vmstore`
+  (local, network-independent). The NAS path depends on tarkin for routing and on archives
+  for the storage itself — backing them up over it deadlocks (see decisions/0009 and the
+  2026-06-23 incident in the Phase 2 log).
 - **archives must not back up to itself.** Its TrueNAS config + 32 GB boot vdisk back up to
   the NVMe/SSD, never to the pool it serves.
 - **TrueNAS snapshots:** periodic ZFS snapshots on `media` and `files` for quick rollback
@@ -30,25 +34,26 @@ deletes, and pool corruption all replicate instantly).
 - The WD MyBook Live is explicitly NOT trusted as a host (EOL; the 2021 remote-wipe CVE).
   If ever used: Tailscale-only, never exposed.
 
-### 4. Config backups — versioned in git
-OPNsense (tarkin) XML export and death-star switch config → `config-backups/`, committed to
-the repo. These make a bare-metal rebuild fast and are diffable over time.
+### 4. Config backups — local + offsite, never public
+OPNsense (tarkin) XML export and death-star switch config → `config-backups/` (local,
+gitignored — NOT committed to the public repo; exports contain secrets) plus the offsite
+copy. These make a bare-metal rebuild fast.
 
 ## Restore chain (disaster recovery runbook)
 1. Reinstall Proxmox on executor; restore `/etc/network/interfaces` + host config.
 2. Recreate/boot tarkin and archives from their NVMe/SSD backups (gets routing + NAS back).
 3. Import the `holocron` pool (drives survive a host reinstall).
 4. Restore remaining VMs from the `vm-backups` dataset.
-5. Pull device configs from git / offsite and reapply.
+5. Pull device configs from the local `config-backups/` folder or the offsite copy and reapply.
 
 ## Schedule
 | What | Frequency | Destination |
 |---|---|---|
-| vzdump (all VMs except archives) | nightly | TrueNAS `vm-backups` (NFS) |
-| archives boot/config | nightly | NVMe/SSD |
+| vzdump service VMs (all except 100, 102) | nightly | TrueNAS `vm-backups` (NFS, soft mount) |
+| vzdump infrastructure VMs (100, 102) | nightly | `ssd-vmstore` (local) |
 | TrueNAS dataset snapshots | per dataset policy | local pool |
-| Offsite sync (files/configs/media) | daily–weekly | Pi 5 + 6 TB via Tailscale |
-| OPNsense + switch config export | per change | `config-backups/` (git) |
+| Offsite sync (files/configs/key media) | daily–weekly | Pi 5 + 6 TB via Tailscale |
+| OPNsense + switch config export | per change | `config-backups/` (local, gitignored) |
 
 ## Accepted risk
 The bulk media pool exists only on-site; only the irreplaceable subset goes offsite. A total
