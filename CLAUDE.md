@@ -33,6 +33,7 @@ Authoritative. Trust them over conversation; if something conflicts, flag it.
 - dnsmasq stays disabled (port 67 vs Kea).
 - Kea auto-collect OFF; set DNS/router manually per subnet.
 - Save switch config to flash BEFORE applying.
-- Infrastructure VMs (tarkin 100, archives 102) back up ONLY to local storage
-  (ssd-vmstore), never to the NAS. The NAS path must never depend on the VM being
-  backed up.
+- tarkin (VM 100) and archives (VM 102) back up ONLY to ssd-vmstore (local). Never to
+  the NAS — the NAS path depends on tarkin for routing and archives for storage itself.
+- nas-vmbackups NFS mount stays soft,timeo=30,retrans=3 — never change to hard.
+- Hung NFS recovery: umount -f -l /mnt/pve/nas-vmbackups
