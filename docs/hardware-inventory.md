@@ -9,10 +9,18 @@ Other docs and the session context defer to this file.
 | CPU | Intel Core i7-7700T |
 | RAM | 64 GB DDR4 |
 | Boot/VM disk | 512 GB NVMe (Samsung 970 EVO) — Proxmox OS + primary VM disks |
-| SSD #1 | 512 GB SATA SSD — VM-disk store (`ssd-vmstore`) |
+| SSD #1 | 512 GB SATA SSD — `ssd-vmstore`: VM disks + infrastructure VM backups |
 | SSD #2 | 512 GB SATA SSD — inquisitor (Wazuh) data (`ssd-inquisitor`) |
 | GPU | discrete GPU (not yet enumerating in Proxmox — Phase 4) + Intel HD 630 iGPU |
 | NICs | 2× 2.5 GbE — `enp0s31f6` (WAN→senate), `enp1s0` (LAN trunk→death-star) |
+
+### Host network
+| Interface | Role | Address | Notes |
+|---|---|---|---|
+| enp0s31f6 → vmbr0 | WAN bridge | 192.168.1.225/24 | tarkin WAN only; not a VM data path |
+| enp1s0 → vmbr1 | LAN trunk | — | VLAN-aware (802.1Q), `bridge-vids 2-4094` |
+| vmbr1.10 | host management | 10.0.10.10/24 | + route `10.0.0.0/16 via 10.0.10.1` |
+| vmbr1.30 | host storage leg | 10.0.30.2/24 | no gateway — host↔archives NFS stays on the bridge, independent of tarkin (ADR 0009) |
 
 ## Storage controllers & drive mapping
 SSDs + NVMe stay on the motherboard SATA controller (Proxmox-owned). All 12 HDDs sit on

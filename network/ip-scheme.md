@@ -31,7 +31,6 @@ DHCP pools begin at `.100` to avoid conflicts.
 | tarkin | OPNsense firewall | 10.0.10.1 (gateway), 10.0.20.1, etc. | All | Gateway on each VLAN |
 | tarkin | WAN | 192.168.1.100 | — | Static, DHCP reservation on senate |
 | executor | Proxmox hypervisor | 10.0.10.10 | 10 | HTTPS :8006 |
-| executor | Storage leg (vmbr1.30) | 10.0.30.2 | 30 | Direct host↔NAS path for NFS backups (ADR 0009) |
 | executor | House management | 192.168.1.225 | — | Static on senate network |
 | death-star | Managed switch | 10.0.10.2 | 10 | HTTP :80 |
 | holonet | WiFi AP | 10.0.20.3 | 20 | HTTP :80 (management via wired only) |
@@ -40,6 +39,7 @@ DHCP pools begin at `.100` to avoid conflicts.
 
 | Hostname | Role | IP | Services |
 |----------|------|----|----------|
+| executor | Proxmox host — storage leg | 10.0.30.2 | vmbr1.30 — host↔NAS NFS (ADR 0009) |
 | archives | TrueNAS SCALE | 10.0.30.20 | NFS, SMB, storage |
 | shipyard | Docker host | 10.0.30.25 | Portainer :9443, Crafty :8443, Minecraft :25565 |
 | order66 | Pi-hole | 10.0.30.53 | DNS :53, Web UI :80 |

@@ -60,8 +60,8 @@ between host and guest, so this physical separation is what makes the passthroug
 | NFS/SMB shares configured | ✅ | |
 | archives PCIe passthrough (both controllers) | ✅ | Raw Device + All Functions + PCIe |
 | TrueNAS static IP 10.0.30.20 | ✅ | + Kea reservation |
-| SSD storage plan implemented | ✅ | VM backups + dedicated inquisitor storage |
-| Proxmox scheduled VM backups | ✅ | Datacenter → Backup |
+| ssd-vmstore created (VM disks + infra backups) | ✅ | SSD #1 wiped → ext4 Directory storage |
+| NAS job nightly (excl. 100/102) + local infra job | ✅ | NAS soft-mounted; 100/102 → ssd-vmstore, keep-last 3 |
 
 ---
 
@@ -269,3 +269,19 @@ Never back up the router through the router — the backup path must not depend 
 being backed up. Infrastructure VMs need backup targets independent of the network they
 serve. Hard NFS mounts turn a storage stall into frozen processes; soft mounts fail
 loudly instead.
+
+### 2026-06-23 — Storage reconfig complete (Phase 2 closed)
+Implemented the backup redesign from the deadlock post-mortem (see decisions/0009):
+- Added host VLAN interface `vmbr1.30` (10.0.30.2/24, no gateway) so host↔NAS NFS is
+  same-subnet on vmbr1 and never traverses tarkin.
+- Verified the TrueNAS `vm-backups` NFS share (scope 10.0.30.0/24, maproot root).
+- Re-enabled `nas-vmbackups` with mount options `soft,timeo=30,retrans=3`, set via
+  `pvesm` (the GUI doesn't expose NFS mount options).
+- Deleted the partial `vzdump-qemu-100-2026_06_23` archive from the failed run.
+- Fixed the NAS job: schedule hourly → nightly; selection excludes VMs 100 and 102.
+- Wiped SSD #1 and recreated it as Directory storage `ssd-vmstore` (ext4), content
+  Disk image + Container + VZDump.
+- Added a nightly local job for VMs 100 + 102 targeting `ssd-vmstore`, keep-last 3.
+- Ran both jobs manually and verified success.
+
+This closes Phase 2: no backup path now depends on the VM being backed up.
