@@ -39,7 +39,8 @@ DHCP pools begin at `.100` to avoid conflicts.
 
 | Hostname | Role | IP | Services |
 |----------|------|----|----------|
-| executor | Proxmox host — storage leg | 10.0.30.2 | vmbr1.30 — host↔NAS NFS (ADR 0009) |
+| executor | Proxmox host — storage leg | 10.0.30.2 | vmbr1.30 — host↔NAS NFS (ADR 0009); remote mgmt UI :8006 (ADR 0011) |
+| phantom | Tailscale gateway | 10.0.30.10 | Subnet router (10.0.30.0/24) + exit node (ADR 0011) |
 | archives | TrueNAS SCALE | 10.0.30.20 | NFS, SMB, storage |
 | shipyard | Docker host | 10.0.30.25 | Portainer :9443, Crafty :8443, Minecraft :25565 |
 | order66 | Pi-hole | 10.0.30.53 | DNS :53, Web UI :80 |
@@ -47,13 +48,30 @@ DHCP pools begin at `.100` to avoid conflicts.
 | vault | Nextcloud | 10.0.30.40 | File server :443 |
 | inquisitor | Wazuh SIEM | 10.0.30.60 | SIEM dashboard :443 |
 
+shipyard holds its in-OS static .25 **plus** a matching Kea reservation (added 2026-07-14 —
+pool-collision guard + Unbound name registration) after the Phase 3 lease audit found the
+NIC also holding a dynamic lease (leftover netplan `dhcp4: true`; removed).
+
 ### Trusted Devices (VLAN 20)
 
 | Hostname | Role | IP | Notes |
 |----------|------|----|-------|
-| falcon | Main PC | 10.0.20.10 | DHCP reservation |
-| scout | Laptop | DHCP | Linux Mint Cinnamon — moves to VLAN 60 in Phase 7 (ADR 0007) |
-| comlink | iPhone | DHCP | |
+| falcon | Main PC | 10.0.20.10 | Kea reservation — created 2026-07-14 (previously documented but never existed; Phase 3 log) |
+| scout | Laptop | DHCP | Linux Mint Cinnamon — OS hostname reconciled to scout 2026-07-14 (was "evil"); moves to VLAN 60 in Phase 7 (ADR 0007) |
+| comlink | iPhone | DHCP | Randomized MAC — deliberately no reservation |
+
+### IoT / Guest (VLAN 50)
+
+| Hostname | Role | IP | Notes |
+|----------|------|----|-------|
+| echo | Amazon Echo | 10.0.50.10 | Kea reservation (2026-07-14) |
+| led-strip | Magic Home LED strip | 10.0.50.11 | Kea reservation (2026-07-14) |
+| levoit-purifier | Levoit air purifier | 10.0.50.12 | Kea reservation (2026-07-14) |
+| levoit-humidifier | Levoit humidifier | 10.0.50.13 | Kea reservation (2026-07-14) |
+| fire-tv | Fire TV stick | 10.0.50.14 | Kea reservation — moved from TRUSTED 2026-07-14 (trust-zone violation; Phase 3 log) |
+
+Phones and guest devices keep randomized (locally administered) MACs and are deliberately
+NOT reserved — a reservation pinned to a rotating MAC breaks silently.
 
 ### Security Lab (VLAN 60)
 

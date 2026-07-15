@@ -45,4 +45,12 @@ backups · Cloudflare Tunnel for any public service.
 - **Single-host SPOF:** tarkin, archives, and all services run on one Proxmox box; host loss
   = network loss. Accepted for a lab; mitigated by backups + fast-rebuild runbooks.
 - **OEM PSU + Molex splitters** powering 14 drives — monitored; hardening planned.
+- **pveproxy listens on all host interfaces:** the Proxmox management UI is reachable on
+  the VLAN 30 storage leg (https://10.0.30.2:8006) — accepted as the gateway-pattern
+  remote-management path (ADR 0011). Candidate mitigations (pve-firewall or a LISTEN_IP
+  bind) are from-home tasks, deferred.
+- **Tailnet ACLs stay default allow-all** while the tailnet is single-user (every device
+  is mine); the controls are device authorization, key management, and MGMT staying
+  structurally unadvertised. Revisit when any non-owner device joins, or at Phase 6
+  hardening (ADR 0011).
 - Physical security, ISP-level threats, and supply chain are out of scope.

@@ -65,5 +65,5 @@ not in the pool.
 | falcon | i5-13600K · RTX 3060Ti · 32 GB · Win10 | workstation, 10.0.20.10 |
 | scout | Linux Mint laptop | future SECLAB attack box (VLAN 60) |
 | comlink | iPhone | VLAN 20 |
-| Pi 5 + 6 TB USB HDD | offsite backup appliance | at relative's, reachable via Tailscale (Phase 3) |
+| Pi 5 + 6 TB USB HDD | offsite backup appliance | at relative's, Tailscale-only (ADR 0010 — pending drive enclosure) |
 | panel-1 / panel-2 | Asus T100T / X205T | dashboard displays (Phase 6) |

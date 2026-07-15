@@ -12,7 +12,8 @@ deletes, and pool corruption all replicate instantly).
 
 ### 2. Local backups — convenience + space (same site)
 - **Service VM backups:** nightly Proxmox vzdump → TrueNAS `vm-backups` dataset (NFS,
-  soft mount). Large, cheap space on RAIDZ2.
+  soft mount). Large, cheap space on RAIDZ2. The job's "all except 100/102" selection
+  auto-enrolls future VMs — phantom was picked up automatically in Phase 3.
 - **Infrastructure VM backups (tarkin 100, archives 102):** nightly vzdump → `ssd-vmstore`
   (local, network-independent). The NAS path depends on tarkin for routing and on archives
   for the storage itself — backing them up over it deadlocks (see decisions/0009 and the
@@ -26,11 +27,18 @@ deletes, and pool corruption all replicate instantly).
 
 ### 3. Offsite — disaster recovery (the real backup)
 - **Appliance:** Pi 5 + 6 TB USB HDD at a relative's house, reachable **only** over
-  Tailscale (no port-forwarding, no exposure). Stood up in Phase 3.
+  Tailscale (no port-forwarding, no exposure). Mechanism decided in Phase 3 (ADR 0010);
+  **implementation pending hardware** (drive enclosure).
 - **Scope:** the *irreplaceable* subset — vault/Nextcloud files, all device configs, and
   selected media. Not the full ~29 TiB pool; that's the point of 3-2-1.
-- **Mechanism:** ZFS `send | recv` over Tailscale if the Pi runs ZFS, else `restic`/`rsync`
-  with encryption. Scheduled + monitored.
+- **Mechanism (ADR 0010):** *pull-based* ZFS replication — `syncoid` on the Pi, over
+  Tailscale. The Pi runs Ubuntu 24.04 with a natively encrypted single-disk ZFS pool; it
+  initiates every transfer and holds the only credential (a delegated `zfs allow` user on
+  archives), so a compromised lab cannot reach — let alone destroy — the offsite copy.
+  Fallback if ZFS-on-USB misbehaves: restic to an append-only rest-server.
+- **Prerequisites on archives:** TrueNAS snapshot tasks on the source datasets; a dedicated
+  dataset for the media subset (e.g. `holocron/media-keep`); a lab-side landing dataset
+  for configs (`holocron/configs`) so they ride along.
 - The WD MyBook Live is explicitly NOT trusted as a host (EOL; the 2021 remote-wipe CVE).
   If ever used: Tailscale-only, never exposed.
 
@@ -52,7 +60,7 @@ copy. These make a bare-metal rebuild fast.
 | vzdump service VMs (all except 100, 102) | nightly | TrueNAS `vm-backups` (NFS, soft mount) |
 | vzdump infrastructure VMs (100, 102) | nightly | `ssd-vmstore` (local) |
 | TrueNAS dataset snapshots | per dataset policy | local pool |
-| Offsite sync (files/configs/key media) | daily–weekly | Pi 5 + 6 TB via Tailscale |
+| Offsite replication (files/configs/key media) | pending hardware (ADR 0010) | Pi 5 — syncoid pull over Tailscale |
 | OPNsense + switch config export | per change | `config-backups/` (local, gitignored) |
 
 ## Accepted risk

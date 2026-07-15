@@ -94,10 +94,10 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 | VM ID | Hostname | OS | Role | VLAN | Status |
 |-------|----------|----|------|------|--------|
 | 100 | tarkin | OPNsense 26.1.6 | Firewall, DHCP, DNS | All | ✅ Running |
-| 101 | phantom | Ubuntu (rebuild pending) | Tailscale exit node | 30 | ⬜ Not running |
+| 101 | phantom | Ubuntu Server 24.04 LTS | Tailscale gateway — subnet router + exit node | 30 | ✅ Running |
 | 102 | archives | TrueNAS SCALE | NAS (dual-controller passthrough) | 30 | ✅ Running |
 | 103 | shipyard | Ubuntu Server 24.04 LTS | Docker, Portainer, Crafty | 30 | ✅ Running |
-| 104 | order66 | — | Pi-hole DNS | 30 | Phase 3 |
+| 104 | order66 | Ubuntu Server 24.04 LTS | Pi-hole DNS | 30 | ✅ Running |
 | 105 | inquisitor | — | Wazuh SIEM | 30 | Phase 6 |
 | 106 | cantina | — | Jellyfin | 30 | Phase 4 |
 | 107 | vault | — | Nextcloud | 30 | Phase 5 |
@@ -115,12 +115,15 @@ visibility, and recoverability. Full write-up: [docs/threat-model.md](docs/threa
 |-------|-------|--------|
 | **1** | Core network — OPNsense, VLANs, managed switch, WiFi AP | ✅ Complete |
 | **2** | Docker services (shipyard), Crafty/Minecraft, TrueNAS VM | ✅ Complete |
-| **3** | Pi-hole DNS filtering + Tailscale remote access | ⬜ |
+| **3** | Pi-hole DNS filtering + Tailscale remote access | ✅ Complete\* |
 | **4** | Jellyfin media server with GPU transcoding | ⬜ |
 | **5** | Nextcloud file server | ⬜ |
 | **6** | Wazuh SIEM + dashboard displays | ⬜ |
 | **7** | Security lab — scout (attack laptop) + rogue (isolated vulnerable VM) | ⬜ |
 | **8** | AI tools + portfolio website | ⬜ |
+
+\* Offsite appliance pending hardware — tracked in
+[phases/phase-3-dns-and-tailscale.md](phases/phase-3-dns-and-tailscale.md).
 
 ---
 

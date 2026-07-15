@@ -14,6 +14,7 @@ has to work with on day one.
 |---|---|---|
 | tarkin (OPNsense) | firewall pass/block, system, VPN, DHCP | remote syslog |
 | order66 (Pi-hole) | per-client DNS queries + blocks | syslog / log export |
+| phantom (Tailscale gateway) | auth, sshd, tailscaled state | syslog / Wazuh agent (Phase 6) |
 | Proxmox host (executor) | auth, kernel, task, cluster | syslog + Wazuh agent |
 | shipyard | host auth + Docker/container logs | Wazuh agent + Docker log driver |
 | archives (TrueNAS) | auth, SMART/ZFS events, share access | syslog |
@@ -24,6 +25,9 @@ has to work with on day one.
 - **Firewall block logs** — denied inter-VLAN attempts = early lateral-movement signal.
 - **DNS query logs (Pi-hole)** — per-client; catches malware C2 / DNS exfil. This is why
   clients point at Pi-hole directly (see `dns-design.md`).
+- **DNS reply codes (Pi-hole)** — a SERVFAIL-ratio spike means the resolver path is broken
+  even when users notice nothing: the Phase 3 zero-upstream incident ran invisibly because
+  clients lived on the DHCP fallback. Phase 6 candidate rule from that incident.
 - **Auth logs** — failed/odd logins across hosts.
 - **ZFS/SMART events** — drive health before failure.
 

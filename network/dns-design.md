@@ -1,5 +1,8 @@
 # DNS Design
 
+**Status: Implemented 2026-07-13 (Phase 3).** SECLAB deferred to Phase 7 as designed.
+Build details and incidents: phases/phase-3-dns-and-tailscale.md.
+
 ## Goal
 One network-wide filtering resolver with private recursion, and per-client query
 visibility for security monitoring.
@@ -28,17 +31,30 @@ visibility for security monitoring.
   order66 outage. Without a fallback, a Pi-hole reboot takes DNS down lab-wide.
 - DNS-option changes only apply on lease renewal — force a renew or bounce the client.
 
-## Firewall impact (changes with the DNS cutover)
-Today FAMILY and IOTGUEST allow `→ 10.0.x.1 : 53` above their `block → 10.0.0.0/16`. Once
-clients point at 10.0.30.53 that exception stops matching and DNS breaks for those VLANs.
-Replace it on FAMILY and IOTGUEST:
-- `pass [VLAN] net → 10.0.30.53 : 53 (TCP/UDP)` **above** the 10.0.0.0/16 block.
-- Optional fallback: also allow `→ 10.0.30.1 : 53`.
-This is the only new hole — one host, port 53. SECLAB keeps gateway DNS or none (Phase 7).
+## Firewall impact (implemented with the cutover)
+FAMILY and IOTGUEST pass `→ 10.0.30.53 : 53` and `→ 10.0.30.1 : 53` (TCP/UDP) **above**
+their `block → 10.0.0.0/16`; the old `→ 10.0.x.1 : 53` exceptions were deleted after
+cutover verification. This is the only inter-VLAN hole — two hosts, one port. SECLAB has
+no exception and therefore no working DNS by default — deliberate, finalized in Phase 7
+(see network/firewall-rules.md).
 
-## Build order (Phase 3)
+## As implemented (Phase 3 details)
+- Pi-hole listens on all interfaces / permits all origins — WHO may reach :53 is enforced
+  at tarkin's firewall, the correct layer; order66 has zero inbound exposure beyond it.
+- Conditional forwarding: 10.0.0.0/16 → 10.0.30.1; local domain `galaxy.internal`
+  (`.internal` is the ICANN-reserved private-use TLD).
+- Naming: Kea reservations for devices worth naming — Kea registers only static
+  reservations in Unbound (on an Unbound restart), never dynamic lease hostnames. The
+  os-kea-unbound plugin was declined (unsigned package on the firewall — supply chain).
+- Remote devices resolve through Pi-hole too: tailnet DNS override 10.0.30.53 primary /
+  10.0.30.1 secondary via phantom's subnet route (ADR 0011).
+
+## Build order (Phase 3 — executed 2026-07-13)
 1. Build order66; install Pi-hole; set upstream = 10.0.30.1 (Unbound).
 2. Switch Unbound on tarkin to recursive mode.
 3. Add FAMILY/IOTGUEST firewall exceptions to 10.0.30.53.
 4. Update Kea DNS options (primary .53, secondary .1) per subnet; renew leases.
 5. Verify per-client logging in Pi-hole and that blocklists resolve.
+
+All five steps done. Post-cutover, an order66-down failover drill passed on 2026-07-14 —
+genuinely, after the zero-upstream incident was fixed (see the Phase 3 log).
