@@ -30,11 +30,16 @@ visibility for security monitoring.
 - Per-subnet **secondary DNS = 10.0.30.1** (tarkin/Unbound) so resolution survives an
   order66 outage. Without a fallback, a Pi-hole reboot takes DNS down lab-wide.
 - DNS-option changes only apply on lease renewal — force a renew or bounce the client.
+- Kea UI quirk (Phase 4): ordered DNS-server lists can silently re-sort on an in-place
+  edit. Fix: remove all entries → re-add in order → Apply. Verify what clients actually
+  received on the wire (`resolvectl status` after a renew), not in the UI.
 
 ## Firewall impact (implemented with the cutover)
 FAMILY and IOTGUEST pass `→ 10.0.30.53 : 53` and `→ 10.0.30.1 : 53` (TCP/UDP) **above**
 their `block → 10.0.0.0/16`; the old `→ 10.0.x.1 : 53` exceptions were deleted after
-cutover verification. This is the only inter-VLAN hole — two hosts, one port. SECLAB has
+cutover verification. Phase 4 added one more exception in the same shape — pass TCP
+`→ 10.0.30.50 : 8096` (Jellyfin on cantina) — so the inter-VLAN holes remain
+one-host-one-port pinholes: DNS + Jellyfin, nothing broader. SECLAB has
 no exception and therefore no working DNS by default — deliberate, finalized in Phase 7
 (see network/firewall-rules.md).
 
@@ -43,9 +48,14 @@ no exception and therefore no working DNS by default — deliberate, finalized i
   at tarkin's firewall, the correct layer; order66 has zero inbound exposure beyond it.
 - Conditional forwarding: 10.0.0.0/16 → 10.0.30.1; local domain `galaxy.internal`
   (`.internal` is the ICANN-reserved private-use TLD).
-- Naming: Kea reservations for devices worth naming — Kea registers only static
-  reservations in Unbound (on an Unbound restart), never dynamic lease hostnames. The
+- Naming: Kea reservations for devices worth naming (cantina added in Phase 4). The
   os-kea-unbound plugin was declined (unsigned package on the firewall — supply chain).
+  Phase 4 corrected the Phase 3 model of *how* registration happens — see the
+  dependency below.
+- Name-registration dependency (Phase 4 — guardrail): registration requires Unbound →
+  General → **Register ISC DHCP4 Leases** and **Register DHCP Static Mappings** both
+  enabled. Despite the ISC naming, on OPNsense 26.x these consume Kea's lease data.
+  With them off, a reservation plus an Unbound restart registers nothing.
 - Remote devices resolve through Pi-hole too: tailnet DNS override 10.0.30.53 primary /
   10.0.30.1 secondary via phantom's subnet route (ADR 0011).
 

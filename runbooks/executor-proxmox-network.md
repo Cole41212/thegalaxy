@@ -1,7 +1,8 @@
 # Runbook: executor Proxmox Network Configuration
 
 **Host:** executor (Proxmox VE 9.1.1)  
-**NICs:** enp0s31f6 (onboard 2.5G, WAN), enp1s0 (PCIe 2.5G, LAN trunk)  
+**NICs:** enp0s31f6 (onboard 2.5G, WAN), enp5s0 (PCIe 2.5G RTL8125, LAN trunk — renamed
+from enp3s0 when the GPU began enumerating in Phase 4; NIC names encode PCI topology)  
 **Management:** https://10.0.10.10:8006 (from TRUSTED) or https://192.168.1.225:8006
 
 ---
@@ -13,7 +14,7 @@ Two physical NICs serve different purposes:
 | NIC | Bridge | Role | Connected to |
 |-----|--------|------|-------------|
 | enp0s31f6 | vmbr0 | WAN — plain bridge | senate (house router) |
-| enp1s0 | vmbr1 | LAN — VLAN-aware trunk | death-star switch port 1 |
+| enp5s0 | vmbr1 | LAN — VLAN-aware trunk | death-star switch port 1 |
 
 `vmbr0` carries untagged traffic for:
 - Proxmox host management (192.168.1.225)
@@ -41,7 +42,7 @@ iface lo inet loopback
 
 iface enp0s31f6 inet manual
 
-iface enp1s0 inet manual
+iface enp5s0 inet manual
 
 # WAN bridge — dedicated NIC, direct to senate
 auto vmbr0
@@ -55,7 +56,7 @@ iface vmbr0 inet static
 # LAN bridge — VLAN-aware trunk to death-star
 auto vmbr1
 iface vmbr1 inet manual
-        bridge-ports enp1s0
+        bridge-ports enp5s0
         bridge-stp off
         bridge-fd 0
         bridge-vlan-aware yes

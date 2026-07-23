@@ -11,27 +11,55 @@ Other docs and the session context defer to this file.
 | Boot/VM disk | 512 GB NVMe (Samsung 970 EVO) — Proxmox OS + primary VM disks |
 | SSD #1 | 512 GB SATA SSD — `ssd-vmstore`: VM disks + infrastructure VM backups |
 | SSD #2 | 512 GB SATA SSD — inquisitor (Wazuh) data (`ssd-inquisitor`) |
-| GPU | discrete GPU (not yet enumerating in Proxmox — Phase 4) + Intel HD 630 iGPU |
-| NICs | 2× 2.5 GbE — `enp0s31f6` (WAN→senate), `enp1s0` (LAN trunk→death-star) |
+| GPU | XFX RX 5700 DD Ultra 8 GB — passed through to cantina (VM 106); Intel HD 630 iGPU — host console. Detail: GPU section below |
+| NICs | 2× 2.5 GbE — `enp0s31f6` (onboard, WAN→senate), `enp5s0` (RTL8125 @ 05:00.0, LAN trunk→death-star) |
 
 ### Host network
 | Interface | Role | Address | Notes |
 |---|---|---|---|
 | enp0s31f6 → vmbr0 | WAN bridge | 192.168.1.225/24 | tarkin WAN only; not a VM data path |
-| enp1s0 → vmbr1 | LAN trunk | — | VLAN-aware (802.1Q), `bridge-vids 2-4094` |
+| enp5s0 → vmbr1 | LAN trunk | — | VLAN-aware (802.1Q), `bridge-vids 2-4094` |
 | vmbr1.10 | host management | 10.0.10.10/24 | + route `10.0.0.0/16 via 10.0.10.1` |
 | vmbr1.30 | host storage leg | 10.0.30.2/24 | no gateway — host↔archives NFS stays on the bridge, independent of tarkin (ADR 0009) |
 
-## Storage controllers & drive mapping
+NIC naming: the LAN trunk is `enp5s0` — renamed from `enp3s0` when the GPU began
+enumerating (Phase 4), and mis-documented as `enp1s0` before that. Predictable NIC names
+encode PCI topology and move with it; re-verify names (and hostpci addresses) after any
+hardware change.
+
+### GPU — XFX RX 5700 DD Ultra 8 GB (→ cantina)
+XFX RX 5700 DD Ultra 8 GB (board RX-57XL8L V1.2) — Navi 10, non-XT (36 active CUs),
+VBIOS `113-1702NAVI10XL8GD6_MS_190612_W8`. Requires 8-pin + 6-pin aux power — unplugged
+aux leads were the root cause of the card's original non-enumeration. No FLR; D3cold
+disabled via udev (runbooks/pcie-passthrough.md, GPU addendum). PCIe atomics are
+unavailable through QEMU — irrelevant to VA-API transcode, relevant only to any future
+ROCm use.
+
+Four PCI functions, all in IOMMU group 2 (the card carries an on-die PCIe switch):
+
+| PCI addr | Function | Device ID | Disposition |
+|---|---|---|---|
+| 01:00.0 | PCIe upstream port | 1002:1478 | host (`pcieport`) — bridge, never passed |
+| 02:00.0 | PCIe downstream port | 1002:1479 | host (`pcieport`) — bridge, never passed |
+| 03:00.0 | GPU | 1002:731f (subsys 1682:5705) | → cantina (VM 106) |
+| 03:00.1 | HDMI audio | 1002:ab38 | → cantina (VM 106) |
+
+## Controllers & drive mapping
 SSDs + NVMe stay on the motherboard SATA controller (Proxmox-owned). All 12 HDDs sit on
 two add-in controllers passed through whole to archives.
 
 | Controller | PCI ID | IOMMU group | Owner | Drives |
 |---|---|---|---|---|
 | Intel Q170 SATA (AHCI) | 00:17.0 | 5 | Proxmox host | 2× 512 GB SSD |
-| ASM1064 SATA | 05:00.0 | 15 | archives (passthrough) | 6× 4 TB SATA |
-| Broadcom SAS3008 HBA | 06:00.0 | 16 | archives (passthrough) | 6× 4 TB SAS |
-| Samsung NVMe | 07:00.0 | 17 | Proxmox host | boot / VM disk |
+| RTL8125 2.5 GbE NIC | 05:00.0 | — | Proxmox host | — (LAN trunk, `enp5s0`) |
+| ASM1064 SATA | 07:00.0 | 15 | archives (passthrough) | 6× 4 TB SATA |
+| Broadcom SAS3008 HBA | 08:00.0 | 16 | archives (passthrough) | 6× 4 TB SAS |
+| Samsung NVMe | 09:00.0 | 17 | Proxmox host | boot / VM disk |
+
+Addresses are post-Phase 4: when the GPU began enumerating (buses 01–03), everything
+behind it shifted — ASM1064 / SAS3008 / NVMe moved from 05/06/07 to 07/08/09, and
+archives' hostpci entries were corrected to match. PCI addresses encode topology;
+re-verify them (and NIC names) after any hardware change.
 
 ### HDDs (confirm serials/models against TrueNAS → Storage → Disks)
 | Serial | Model | Interface | Controller | Recording |

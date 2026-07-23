@@ -44,13 +44,19 @@ DHCP pools begin at `.100` to avoid conflicts.
 | archives | TrueNAS SCALE | 10.0.30.20 | NFS, SMB, storage |
 | shipyard | Docker host | 10.0.30.25 | Portainer :9443, Crafty :8443, Minecraft :25565 |
 | order66 | Pi-hole | 10.0.30.53 | DNS :53, Web UI :80 |
-| cantina | Jellyfin | 10.0.30.50 | Media server :8096 |
+| cantina | Jellyfin | 10.0.30.50 | Media server :8096 (Phase 4 — see note below) |
 | vault | Nextcloud | 10.0.30.40 | File server :443 |
 | inquisitor | Wazuh SIEM | 10.0.30.60 | SIEM dashboard :443 |
 
 shipyard holds its in-OS static .25 **plus** a matching Kea reservation (added 2026-07-14 —
 pool-collision guard + Unbound name registration) after the Phase 3 lease audit found the
 NIC also holding a dynamic lease (leftover netplan `dhcp4: true`; removed).
+
+cantina is deliberately DHCP-configured in-OS (netplan `dhcp4: true`) with a Kea
+reservation at 10.0.30.50 (`bc:24:11:78:00:83`, VLAN 30, Phase 4) — not static-in-OS
+like its VLAN 30 neighbors. Name registration consumes the DHCP exchange, so the lease
+is what registers `cantina` in Unbound; a static-in-OS host never appears in it
+(network/dns-design.md).
 
 ### Trusted Devices (VLAN 20)
 

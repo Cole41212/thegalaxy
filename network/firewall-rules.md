@@ -18,6 +18,7 @@ Top-down evaluation, first match wins. Order within an interface matters.
 |---|---|---|---|---|
 | pass | FAMILY net | 10.0.30.53 | 53 (TCP/UDP) | DNS to order66 (Pi-hole) — must sit above block |
 | pass | FAMILY net | 10.0.30.1 | 53 (TCP/UDP) | DNS fallback to tarkin (Unbound) — above block |
+| pass | FAMILY net | 10.0.30.50 | 8096 (TCP) | Jellyfin on cantina — above block (Phase 4) |
 | block | FAMILY net | 10.0.0.0/16 | any | No homelab access |
 | pass | FAMILY net | any | any | Internet only |
 
@@ -26,6 +27,7 @@ Top-down evaluation, first match wins. Order within an interface matters.
 |---|---|---|---|---|
 | pass | IOTGUEST net | 10.0.30.53 | 53 (TCP/UDP) | DNS to order66 (Pi-hole) — must sit above block |
 | pass | IOTGUEST net | 10.0.30.1 | 53 (TCP/UDP) | DNS fallback to tarkin (Unbound) — above block |
+| pass | IOTGUEST net | 10.0.30.50 | 8096 (TCP) | Jellyfin on cantina — above block (Phase 4) |
 | block | IOTGUEST net | 10.0.0.0/16 | any | No homelab access |
 | pass | IOTGUEST net | any | any | Internet only |
 
@@ -54,11 +56,20 @@ designs SECLAB's DNS posture on purpose (see network/dns-design.md).
 ## Design notes
 - WAN "block private networks" is DISABLED — tarkin's WAN faces senate (192.168.1.0/24),
   not the raw internet.
-- FAMILY/IOTGUEST DNS exceptions exist because the broad 10.0.0.0/16 block would otherwise
-  drop DNS to order66 (10.0.30.53) and the Unbound fallback (10.0.30.1).
+- FAMILY/IOTGUEST exceptions are one-host-one-port pinholes above the broad 10.0.0.0/16
+  block: DNS to order66 (10.0.30.53) and the Unbound fallback (10.0.30.1), and TCP 8096
+  to cantina (Jellyfin — Phase 4, same pattern).
 
 ## Phase 3 DNS cutover — implemented 2026-07-13
 FAMILY and IOTGUEST now pass port 53 to 10.0.30.53 (order66) and 10.0.30.1 (Unbound
 fallback) above their blocks, as shown in the tables above; the old `→ 10.0.x.1 : 53`
-exceptions were deleted after cutover verification. Still the only inter-VLAN hole — two
-hosts, one port. Details: phases/phase-3-dns-and-tailscale.md.
+exceptions were deleted after cutover verification. At the time the only inter-VLAN
+hole — two hosts, one port (Phase 4 added the Jellyfin pinhole below). Details:
+phases/phase-3-dns-and-tailscale.md.
+
+## Phase 4 Jellyfin pinholes — implemented 2026-07
+FAMILY and IOTGUEST pass TCP → 10.0.30.50:8096 (Jellyfin on cantina) above their
+10.0.0.0/16 blocks, mirroring the DNS exception pattern. Verified in both directions
+from both VLANs: allow — the Jellyfin app loads; deny — Portainer (10.0.30.25:9443)
+remains unreachable. The inter-VLAN exceptions stay one-host-one-port pinholes: DNS +
+Jellyfin, nothing broader. Details: phases/phase-4-cantina-and-gpu.md.

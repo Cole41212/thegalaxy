@@ -88,7 +88,7 @@
 
   <!-- trunk to switch -->
   <line x1="460" y1="618" x2="460" y2="642" stroke="#3b82f6" stroke-width="1.5"/>
-  <text x="466" y="634" fill="#3b82f6" font-size="7.5">LAN trunk (enp1s0 → vmbr1 · 802.1Q)</text>
+  <text x="466" y="634" fill="#3b82f6" font-size="7.5">LAN trunk (enp5s0 → vmbr1 · 802.1Q)</text>
 
   <!-- death-star -->
   <rect x="300" y="642" width="320" height="50" rx="8" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.5"/>

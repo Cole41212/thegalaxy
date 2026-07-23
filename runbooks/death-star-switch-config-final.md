@@ -12,9 +12,10 @@
 **Credentials:** admin / [your password]
 
 Use this runbook to configure or reconfigure death-star from scratch.
-This reflects the final dedicated-NIC architecture — executor's LAN NIC (enp1s0)
-connects to port 1, and the Asus cable connects directly to executor's WAN NIC
-(not the switch). There are three active ports.
+This reflects the final dedicated-NIC architecture — executor's LAN NIC (enp5s0; named
+enp1s0/enp3s0 in older docs — renamed by the Phase 4 GPU bus renumbering) connects to
+port 1, and the Asus cable connects directly to executor's WAN NIC (not the switch).
+There are three active ports.
 
 ---
 
@@ -22,7 +23,7 @@ connects to port 1, and the Asus cable connects directly to executor's WAN NIC
 
 | Port | Device | Role |
 |------|--------|------|
-| 1 | executor (enp1s0, LAN NIC) | VLAN trunk — carries all homelab VLANs |
+| 1 | executor (enp5s0, LAN NIC) | VLAN trunk — carries all homelab VLANs |
 | 2 | falcon | Trusted workstation |
 | 3 | holonet | WiFi AP — three SSIDs across three VLANs |
 | 4–8 | unused | Available for future devices |

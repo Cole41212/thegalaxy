@@ -38,7 +38,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
                │
            executor (Proxmox VE 9.1.1)
            ├── enp0s31f6 → vmbr0 (WAN, 192.168.1.225)
-           └── enp1s0 → vmbr1 (LAN trunk, VLAN-aware)
+           └── enp5s0 → vmbr1 (LAN trunk, VLAN-aware)
                    │
                ┌───▼──────────┐
                │    tarkin     │  OPNsense 26.1.6
@@ -77,7 +77,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 
 | Hostname | Role | Specs |
 |----------|------|-------|
-| executor | Proxmox hypervisor | i7 7700T, 64GB DDR4, 512GB NVMe, 2x512GB SSD, 12×4TB HDD (6 SATA + 6 SAS), GPU, 2× NICs |
+| executor | Proxmox hypervisor | i7 7700T, 64GB DDR4, 512GB NVMe, 2x512GB SSD, 12×4TB HDD (6 SATA + 6 SAS), RX 5700 8GB + HD 630, 2× NICs |
 | tarkin | OPNsense firewall (VM) | VM on executor |
 | archives | TrueNAS SCALE (VM) | VM on executor, HDD controller passthrough |
 | death-star | Core switch | ZX-SWTGW215AS, 8-port 2.5G managed |
@@ -99,7 +99,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 | 103 | shipyard | Ubuntu Server 24.04 LTS | Docker, Portainer, Crafty | 30 | ✅ Running |
 | 104 | order66 | Ubuntu Server 24.04 LTS | Pi-hole DNS | 30 | ✅ Running |
 | 105 | inquisitor | — | Wazuh SIEM | 30 | Phase 6 |
-| 106 | cantina | — | Jellyfin | 30 | Phase 4 |
+| 106 | cantina | Ubuntu Server 24.04 LTS | Jellyfin media server — RX 5700 GPU passthrough | 30 | ✅ Running |
 | 107 | vault | — | Nextcloud | 30 | Phase 5 |
 | 108 | rogue | — | Vulnerable VM (isolated, no internet) | 60 | Phase 7 |
 
@@ -116,7 +116,7 @@ visibility, and recoverability. Full write-up: [docs/threat-model.md](docs/threa
 | **1** | Core network — OPNsense, VLANs, managed switch, WiFi AP | ✅ Complete |
 | **2** | Docker services (shipyard), Crafty/Minecraft, TrueNAS VM | ✅ Complete |
 | **3** | Pi-hole DNS filtering + Tailscale remote access | ✅ Complete\* |
-| **4** | Jellyfin media server with GPU transcoding | ⬜ |
+| **4** | Jellyfin media server with GPU transcoding | ✅ Complete |
 | **5** | Nextcloud file server | ⬜ |
 | **6** | Wazuh SIEM + dashboard displays | ⬜ |
 | **7** | Security lab — scout (attack laptop) + rogue (isolated vulnerable VM) | ⬜ |

@@ -53,4 +53,12 @@ backups · Cloudflare Tunnel for any public service.
   is mine); the controls are device authorization, key management, and MGMT staying
   structurally unadvertised. Revisit when any non-owner device joins, or at Phase 6
   hardening (ADR 0011).
+- **FAMILY/IOTGUEST → cantina :8096 (Jellyfin):** the low-trust VLANs reach exactly one
+  TCP port on VM 106 — one-host-one-port pinholes in the DNS-exception pattern
+  (Phase 4). A Jellyfin compromise reached this way still lands on a VM that mounts the
+  library read-only (ADR 0013).
+- **TRUSTED → archives :445 (SMB media ingest):** ingest from falcon runs as `coalish`,
+  a dedicated non-admin account scoped to the media dataset (ADR 0013). No new firewall
+  rule was involved — TRUSTED's full access to SERVERS is the documented design (trust
+  zones above), so the control here is credential scope, not the network path.
 - Physical security, ISP-level threats, and supply chain are out of scope.
