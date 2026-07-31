@@ -110,6 +110,9 @@ the verification caveat.
   "all except" selection, per ADR 0009).
 - **Pinholes verified both directions from both VLANs:** allow — Jellyfin loads from
   FAMILY and IOTGUEST; deny — Portainer (10.0.30.25:9443) remains unreachable from both.
+- **Remote streaming over LTE:** Jellyfin verified playing over the tailnet from a phone on
+  LTE, off home WiFi — the ADR 0011 gateway path (phantom's subnet route) carrying a real
+  media stream, with no inbound port opened.
 
 ---
 

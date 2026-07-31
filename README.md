@@ -100,7 +100,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 | 104 | order66 | Ubuntu Server 24.04 LTS | Pi-hole DNS | 30 | ✅ Running |
 | 105 | inquisitor | — | Wazuh SIEM | 30 | Phase 6 |
 | 106 | cantina | Ubuntu Server 24.04 LTS | Jellyfin media server — RX 5700 GPU passthrough | 30 | ✅ Running |
-| 107 | vault | — | Nextcloud | 30 | Phase 5 |
+| 107 | vault | Ubuntu Server 24.04 LTS | Immich (photo/video, self-hosted iCloud replacement) | 30 | Phase 5 |
 | 108 | rogue | — | Vulnerable VM (isolated, no internet) | 60 | Phase 7 |
 
 ---
@@ -117,7 +117,7 @@ visibility, and recoverability. Full write-up: [docs/threat-model.md](docs/threa
 | **2** | Docker services (shipyard), Crafty/Minecraft, TrueNAS VM | ✅ Complete |
 | **3** | Pi-hole DNS filtering + Tailscale remote access | ✅ Complete\* |
 | **4** | Jellyfin media server with GPU transcoding | ✅ Complete |
-| **5** | Nextcloud file server | ⬜ |
+| **5** | Immich photo platform + iCloud migration | ⬜ |
 | **6** | Wazuh SIEM + dashboard displays | ⬜ |
 | **7** | Security lab — scout (attack laptop) + rogue (isolated vulnerable VM) | ⬜ |
 | **8** | AI tools + portfolio website | ⬜ |
@@ -134,7 +134,7 @@ visibility, and recoverability. Full write-up: [docs/threat-model.md](docs/threa
 | 2 | Proxmox VE · Docker · TrueNAS/ZFS · PCIe controller passthrough · IOMMU isolation · RAIDZ2 · NFS |
 | 3 | Pi-hole · recursive Unbound · Tailscale · firewall policy · 3-2-1 backup |
 | 4 | GPU passthrough · Jellyfin hardware transcode |
-| 5 | Nextcloud · self-hosted file services |
+| 5 | Self-hosted photo management · rw NFS design · cloud-service migration |
 | 6 | Wazuh SIEM · log-pipeline design · detection engineering · dashboards |
 | 7 | Attack/defend range · vulnerability management · network isolation |
 | 8 | Cloudflare Tunnel · DMZ design · automation/scripting |

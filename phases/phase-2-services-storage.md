@@ -148,7 +148,8 @@ Drives: 6 SATA on the ASM1064, 6 SAS on the SAS3008 — both controllers passed 
 | Dataset | Preset | Purpose |
 |---------|--------|---------|
 | media | Generic | cantina / Jellyfin (Phase 4) |
-| files | Generic | vault / Nextcloud (Phase 5) |
+| files | Generic | Unused — awaiting the ADR 0014 file-sync revisit (Phase 6 planning) |
+| photos | Generic | vault / Immich library — recordsize=1M, atime=off (Phase 5, ADR 0015) |
 | crafty-backups | Generic | shipyard Minecraft backups |
 | vm-backups | Generic | Proxmox overflow backups |
 

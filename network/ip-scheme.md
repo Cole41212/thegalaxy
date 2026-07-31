@@ -45,7 +45,7 @@ DHCP pools begin at `.100` to avoid conflicts.
 | shipyard | Docker host | 10.0.30.25 | Portainer :9443, Crafty :8443, Minecraft :25565 |
 | order66 | Pi-hole | 10.0.30.53 | DNS :53, Web UI :80 |
 | cantina | Jellyfin | 10.0.30.50 | Media server :8096 (Phase 4 — see note below) |
-| vault | Nextcloud | 10.0.30.40 | File server :443 |
+| vault | Immich | 10.0.30.40 | Immich :2283 (Phase 5 — see note below) |
 | inquisitor | Wazuh SIEM | 10.0.30.60 | SIEM dashboard :443 |
 
 shipyard holds its in-OS static .25 **plus** a matching Kea reservation (added 2026-07-14 —
@@ -57,6 +57,11 @@ reservation at 10.0.30.50 (`bc:24:11:78:00:83`, VLAN 30, Phase 4) — not static
 like its VLAN 30 neighbors. Name registration consumes the DHCP exchange, so the lease
 is what registers `cantina` in Unbound; a static-in-OS host never appears in it
 (network/dns-design.md).
+
+vault follows the same deviation (Phase 5): DHCP in-OS plus a Kea reservation at
+10.0.30.40, so the lease registers `vault` in Unbound and the FQDN resolves. The
+reservation is also what `/etc/hosts` on vault points its own hostname at, instead of the
+installer's `127.0.1.1` (phases/phase-5-vault-immich.md).
 
 ### Trusted Devices (VLAN 20)
 

@@ -13,7 +13,7 @@ knowingly accepted (below).
 5. **No inbound exposure** — nothing internet-reachable except via an outbound-only tunnel.
 
 ## Assets
-- Personal/family files (vault) and media (archives).
+- The personal photo/video library (vault — Immich, ADR 0014) and media (archives).
 - The hypervisor (executor) and firewall (tarkin) — compromise = whole-network control.
 - Credentials, configs, and the integrity of the monitoring pipeline.
 
@@ -57,6 +57,13 @@ backups · Cloudflare Tunnel for any public service.
   TCP port on VM 106 — one-host-one-port pinholes in the DNS-exception pattern
   (Phase 4). A Jellyfin compromise reached this way still lands on a VM that mounts the
   library read-only (ADR 0013).
+- **Cleartext HTTP to vault :2283 (Immich):** no domain exists until Phase 8, and
+  self-signed certs break Immich's mobile client (upload/playback), so vault serves plain
+  HTTP on one URL for both LAN and tailnet (ADR 0017). Exposure is VLAN 30 and TRUSTED
+  WiFi; the positioned adversary above (compromised IoT/guest) is contained to VLAN 50 with
+  no lab reach, and remote access rides phantom's existing subnet route rather than a new
+  tailnet node. Time-boxed: Phase 8 remediates with Caddy + ACME DNS-01 on the portfolio
+  domain (zero inbound ports).
 - **TRUSTED → archives :445 (SMB media ingest):** ingest from falcon runs as `coalish`,
   a dedicated non-admin account scoped to the media dataset (ADR 0013). No new firewall
   rule was involved — TRUSTED's full access to SERVERS is the documented design (trust
