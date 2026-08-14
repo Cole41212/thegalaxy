@@ -97,4 +97,9 @@ Tunnel for any public service.
   `config-backups/`. Design goal 4 (recoverability) is therefore met for data but not yet
   for configs — a total site loss would mean rebuilding tarkin and death-star from the
   runbooks rather than restoring them. Tracked in ADR 0010.
+- **Repository is public.** Software versions, network topology, VLAN design, and firewall
+  rules are published deliberately as portfolio content. This is only an aid to an attacker
+  in combination with the site's public IP, which does not appear in the repo and cannot be
+  derived from it. Personal location detail was removed in the 2026-08-16 sanitization pass
+  (phases/phase-5-vault-immich.md).
 - Physical security, ISP-level threats, and supply chain are out of scope.

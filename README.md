@@ -118,8 +118,8 @@ visibility, and recoverability. Full write-up: [docs/threat-model.md](docs/threa
 | **2** | Docker services (shipyard), Crafty/Minecraft, TrueNAS VM | ✅ Complete |
 | **3** | Pi-hole DNS filtering + Tailscale remote access | ✅ Complete |
 | **4** | Jellyfin media server with GPU transcoding | ✅ Complete |
-| **5** | Immich photo platform + iCloud migration | 🚧 Migrated · offsite gate met — soak + cleanup pending |
-| **6** | Wazuh SIEM + dashboard displays | ⬜ |
+| **5** | Immich photo platform + iCloud migration | ✅ Complete |
+| **6** | Wazuh SIEM + dashboard displays | 🚧 Current |
 | **7** | Security lab — scout (attack laptop) + rogue (isolated vulnerable VM) | ⬜ |
 | **8** | AI tools + portfolio website | ⬜ |
 

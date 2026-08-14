@@ -7,9 +7,13 @@ copies of the library. Along the way: the platform choice (ADR 0014), the data-p
 rw-NFS semantics (ADR 0015), the deployment/extraction/backup model (ADR 0016), and the
 access and TLS posture (ADR 0017).
 
-**Status:** 🚧 In progress — migration complete and the ADR 0016 cancellation gate satisfied
-(offsite replication verified by restore test, 2026-08-14); the two-week soak, the iCloud+
-cancellation itself, and post-phase cleanup remain
+**Status:** ✅ Complete — migration done, the ADR 0016 cancellation gate satisfied (offsite
+replication verified by restore test, 2026-08-14), the restore runbook written, and the repo
+sanitization pass finished (2026-08-16). The structural work is done; the checklist rows still
+unticked below are post-phase tasks carried rather than blockers — the iCloud+ cancellation
+(scheduled before the 2026-09-09 renewal), cleanup, and the two-week soak, which runs to
+~2026-08-27 from the 2026-08-13 cutover. Phase 6 inputs are itemized in Deferred / follow-ups
+below.
 
 ---
 
@@ -152,8 +156,9 @@ for no stated need, the primary client being the iOS app.
 | New-photo round trip verified | ✅ | Photo taken on the device uploaded to the server immediately |
 | Two clean weeks | ⬜ | Auto-backup running, no gaps |
 | Pi 5 replicating `holocron/photos` | ✅ | 2026-08-14 — echo-base seeded 154 GB; **restore test passed** (sha256 match against source). ADR 0010 implemented, ADR 0016 gate satisfied |
-| iCloud+ cancelled | TODO(cole) | The gate above is now met, so this is unblocked. Renewal is 2026-09-09 — confirm whether to cancel now or ride to renewal |
-| Cleanup | ⬜ | Revoke the API key, restore falcon's power settings, delete the takeout (no longer needed as the interim third copy now that offsite is live) |
+| Repo sanitization pass | ✅ | 2026-08-16 — read-only exposure audit across all tracked files, binaries, and full git history; personal-location detail redacted, residence diagram removed from history (log below) |
+| iCloud+ cancelled | ⬜ | Unblocked — the ADR 0016 gate is satisfied. Scheduled to be cancelled before the 2026-09-09 renewal |
+| Cleanup | ⬜ | Revoke the migration API key, restore falcon's power settings, delete the takeout zips **and** the extracted tree (no longer needed as the interim third copy now that offsite is live) |
 
 ---
 
@@ -772,31 +777,114 @@ real risk — could have been mistaken for a satisfied cancellation gate while t
 supposed to protect did not yet exist in full. The appliance itself was built in parallel
 with the migration; only the final pull was gated.
 
+### 2026-08-16 — Public-exposure audit and git history rewrite
+
+Ran a read-only exposure audit across all 65 tracked files, all binary assets, and the
+complete git history before treating the repo as portfolio-ready.
+
+**Clean:** zero credentials, keys, or certificate material anywhere in tree or history; zero
+tailnet (100.x) addresses or `*.ts.net` hostnames; zero public/WAN addresses; no email
+addresses, phone numbers, or street addresses. `config-backups/` verified both gitignored
+**and** untracked across full history — an ignore rule does not untrack a file committed
+before the rule existed, so this was checked against history rather than the current tree.
+
+**Findings were entirely personal-location.** The sharpest one was a binary that no text
+search could surface: a storey-by-storey network diagram of the residence, labelling the
+specific room holding the Proxmox and TrueNAS servers, the rooms of two other occupants, and
+the ISP, service tier, and demarc location. It was unreferenced by any document and superseded
+by the existing topology SVGs, so it carried no portfolio value proportional to the exposure.
+Deleted.
+
+**Redactions.** Location language ("a named relative's home", state, and "same town") was
+redacted across 15 occurrences in 9 files; the threat-model passage was *rewritten rather than
+deleted*, so the correlated-regional-risk analysis survives without the geography. ISP name
+genericised in two topology SVGs. Physical device MACs truncated to vendor OUI; virtual
+Proxmox MACs left as-is. Drive serials, software versions, the documented port-forward rule,
+and the school reference were deliberately retained as legitimate portfolio content.
+
+**History rewrite.** Because the diagram had been committed since 2026-06-23, removing it from
+the working tree was insufficient — it remained retrievable in history. Rewrote history with
+`git filter-repo` (`--invert-paths` against **both** historical paths, since the file had
+moved), force-pushed, and verified against a **fresh clone** rather than the working copy:
+`git rev-list --objects --all | grep -i homenetwork` returned nothing, which is the only test
+that proves what a third party actually receives. The second clone was deleted and re-cloned
+rather than pulled, since pulling against rewritten history merges divergent trees and would
+reintroduce the removed commits.
+
+#### Learning
+(a) Audit binaries, not just text — grep cannot see inside a rasterised image or PDF. (b)
+Verify gitignore effectiveness against history, not the current tree. (c) Verify a history
+rewrite from a fresh clone. (d) Redact silently — a superseding entry explaining that a
+location was removed advertises exactly what was taken out and preserves it in the diff.
+
+**Residual accepted:** GitHub retains unreachable objects fetchable by exact SHA until it
+garbage-collects on an unpublished schedule.
+
 ---
 
 ## Deferred / follow-ups
 
-- **Nextcloud, or a lighter file-sync option** — revisit at Phase 6 planning, on the ADR 0014
-  triggers (external share links, an auth-log-rich app target, or SMB proving insufficient).
-- **Wazuh rule: no new DB dump in 48h** — Phase 6. The dumps are currently unmonitored;
-  interim mitigation is a monthly manual check (ADR 0016 known gap).
-- **Monitoring gap: Proxmox alert mail is not being delivered** — postfix on executor cannot
-  reach the configured Gmail address (connect timed out / network unreachable to
-  `gmail-smtp-in`, messages deferred), so Proxmox alert mail has not been arriving at all.
-  The 2026-08-02 pool-degraded alert was never received, and the fault was found manually
-  days later. Fix SMTP delivery — a relay with an app password, or an alternative
-  notification target. A Phase 6 monitoring input, and arguably the most important finding of
-  the 2026-08-05 investigation.
-- **`pvescheduler` replication-state noise on executor** — `pvescheduler` logs `replication:
-  invalid json data in /var/lib/pve-manager/pve-replication-state.json` every 60 seconds, and
-  has done since at least 2026-07-19. No PVE replication jobs are configured, so it is
-  harmless in itself — but it floods the journal and would bury real signal during a future
-  incident. Reset the state file. The "before the bulk import" deadline this was originally
-  written against has passed, so confirm the current state and clear it.
-- **Immich patch-cadence automation** — candidate for Phase 8; Immich does not backport, so
-  this box moves faster than the rest of the lab (ADR 0014).
-- **`runbooks/immich-restore.md`** — to be written at phase close. Must state plainly that a
-  database dump alone is not a restore: it takes the dump *plus* `UPLOAD_LOCATION`, together.
+### Closed in this phase
+
+- ~~**Offsite replication of `holocron/photos`**~~ — **closed 2026-08-14.** echo-base is live
+  and pulling nightly; the seed was verified by restore test (sha256 match against source),
+  which satisfies the ADR 0016 cancellation gate. See the
+  [ADR 0010 implementation amendment](../decisions/0010-offsite-replication-mechanism.md) and
+  [runbooks/offsite-replication.md](../runbooks/offsite-replication.md).
+- ~~**Phase 3's deferred offsite appliance**~~ — **closed 2026-08-14**, built during this
+  phase as `echo-base`. Already struck in
+  [phases/phase-3-dns-and-tailscale.md](phase-3-dns-and-tailscale.md); recorded here so the
+  item is closed in both places rather than in one.
+- ~~**`runbooks/immich-restore.md`**~~ — **closed 2026-08-16.** Written at phase close:
+  [runbooks/immich-restore.md](../runbooks/immich-restore.md). Leads with the rule it exists
+  to carry — a database dump alone is not a restore; it takes the dump *plus*
+  `UPLOAD_LOCATION`, together.
+
+### Carried into Phase 6
+
+Stated as concrete inputs, not notes — these are the starting backlog for the monitoring
+phase.
+
+1. **Proxmox alert mail does not deliver.** postfix on executor cannot reach the configured
+   Gmail address (connect timed out / network unreachable to `gmail-smtp-in`, messages
+   deferred), so Proxmox alert mail has not been arriving at all. The 2026-08-02
+   pool-degraded alert was never received and the drive fault was found manually days later.
+   Fix SMTP delivery — a relay with an app password, or an alternative notification target.
+   **This is the highest-value monitoring gap in the lab:** every other alerting improvement
+   is worth less while the existing alerts go nowhere.
+2. **Immich DB dumps are unmonitored** — build a Wazuh rule alerting on no-new-dump-in-48h.
+   Interim mitigation is a monthly manual check that the newest file in `/mnt/photos/backups`
+   is recent and non-trivially sized (ADR 0016 known gap; procedure in
+   [runbooks/immich-restore.md](../runbooks/immich-restore.md)).
+3. **Immich patch cadence needs a deliberate update process.** Upstream does not backport
+   fixes, the deployment is pinned to `v3.0.3` in `/opt/immich/.env`, and `v3.1.0` is
+   available and deliberately unapplied. Define the process — read release notes, verify a
+   current dump, note the version the dump came from, update, verify — rather than leaving it
+   to drift (ADR 0014 patch-cadence consequence).
+4. **`pvescheduler` replication-state noise on executor** — logs `replication: invalid json
+   data in /var/lib/pve-manager/pve-replication-state.json` every 60 seconds, and has done
+   since at least 2026-07-19. No PVE replication jobs are configured, so it is harmless in
+   itself, but it floods the journal and would bury real signal during an incident. Reset the
+   state file. Confirm the current state first — the "before the bulk import" deadline this
+   was originally written against has passed.
+5. **ADR 0014 revisit: file sync / Nextcloud.** Trigger **(b)** — "Phase 6 wanting an
+   auth-log-rich application target" — is now live, which moves this from a scheduled revisit
+   to an active decision. The other two triggers (external share links, SMB proving
+   insufficient for remote file access) remain unfired. Note that `holocron/files` already
+   exists and is empty.
+6. **`holocron/configs` was never created**, so the OPNsense XML export and the switch config
+   have no offsite copy and live only in the local, gitignored `config-backups/`. ADR 0010's
+   Consequences listed this as a requirement and it is unmet; the replication set currently
+   carries `holocron/photos` and `holocron/media` only. Create the dataset and add it to the
+   replication set, or accept the gap explicitly in the threat model.
+7. **Cold spare drive policy** — keep at least one tested 4 TB spare on hand. The 2026-08-11
+   `sdd` replacement worked because a suitable drive happened to be available; that is luck,
+   not a policy. "Tested" is load-bearing: verify logical block size with `sg_readcap --long`
+   *before* shelving a used enterprise SAS drive, so the 520-byte-sector discovery happens at
+   purchase rather than during a degraded-pool rebuild.
+
+### Accepted / no action
+
 - **A minority of assets carry incorrect timeline dates** — Immich falls back to file mtime
   (2026-08-04, the extraction date) when EXIF `DateTimeOriginal` is absent. The affected
   population is predictable: screenshots, screen recordings, re-exported or edited images,
@@ -805,19 +893,11 @@ with the migration; only the final pull was gated.
   resolves most of the visible impact. The residual is **accepted as-is** — Immich cannot
   infer a date that does not exist in the file, and per-asset correction is not worth the
   effort at this volume. Revisit only if a specific album or year proves materially wrong.
-- **Immich v3.1.0 is available** — deliberately *not* applied during the migration; the
-  deployment stays pinned to `v3.0.3` in `.env`. Updating is a post-phase decision requiring a
-  read of the release notes, per the ADR 0014 patch-cadence consequence.
 - **Free Up Space — now unblocked, still not run** — Immich's local-asset reclamation shows a
   review screen and moves assets to iOS Recently Deleted rather than deleting outright, but
   it is the irreversible step in the cutover. It was gated on the Pi 5 replicating, which is
   satisfied as of 2026-08-14. Running it is now a judgement call rather than a blocked one;
   the conservative order is to let the two-week soak finish first.
-- **`holocron/configs` was never created** — so the OPNsense XML export and the switch config
-  have no offsite copy and live only in the local, gitignored `config-backups/`. ADR 0010's
-  Consequences listed this as a requirement and it is unmet; the replication set currently
-  carries `holocron/photos` and `holocron/media` only.
-  TODO(cole): open as a tracked follow-up, or accept explicitly.
 - **echo-base is a single point of failure by design** — one disk, no redundancy, at a remote
   site (ADR 0010 amendment). A detected checksum error is answered by re-replicating from
   holocron, which is fine while holocron is healthy — but it does mean the offsite tier has

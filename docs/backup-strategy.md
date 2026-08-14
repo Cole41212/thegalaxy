@@ -94,6 +94,7 @@ copy. These make a bare-metal rebuild fast.
 4. Restore remaining VMs from the `vm-backups` dataset. For vault, the vzdump restore is
    only the machine — Immich is not back until the latest logical dump from
    `holocron/photos/backups` is loaded *and* `UPLOAD_LOCATION` is remounted (ADR 0016).
+   Step-by-step: [runbooks/immich-restore.md](../runbooks/immich-restore.md).
 5. Pull device configs from the local `config-backups/` folder and reapply. Note: configs
    are **not** currently in the offsite set (`holocron/configs` was never created), so this
    step depends on the local copy surviving — the one gap in the chain above.
