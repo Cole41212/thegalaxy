@@ -73,16 +73,17 @@ Tunnel for any public service.
   a dedicated non-admin account scoped to the media dataset (ADR 0013). No new firewall
   rule was involved — TRUSTED's full access to SERVERS is the documented design (trust
   zones above), so the control here is credential scope, not the network path.
-- **Offsite copy is currently in the same town as the lab.** echo-base is at mom's house in
-  NJ and the lab is also in NJ, so today the offsite tier delivers ransomware isolation,
+- **Offsite copy is within the same metropolitan area as the primary site.** echo-base sits
+  at a separate physical site, so today the offsite tier delivers ransomware isolation,
   hardware-failure independence, and household separation — different building, different
-  power, different ISP — but not regional separation. A single area-wide event could reach
-  both sites. This closes when the lab relocates to NY, at which point the same appliance
-  over the same tailnet path gives real geographic separation with no reconfiguration.
+  power, different ISP — but not regional separation. Correlated regional risk — severe
+  weather, an extended grid outage, any single area-wide event — is not mitigated by this
+  arrangement. A planned relocation will increase geographic separation, at which point the
+  same appliance over the same tailnet path delivers it with no reconfiguration.
   TODO(cole): characterize this — accepted risk until relocation, or a tracked gap with a
   target date?
 - **`pibackup` is a delegated credential resident on off-site hardware.** The account lives
-  on archives but its private key sits on a Pi in another house, outside physical control.
+  on archives but its private key sits on a Pi at another site, outside physical control.
   Blast radius if echo-base is stolen or compromised: **read** access to `holocron/photos`
   and `holocron/media`, and nothing else. The delegation is
   `send,snapshot,hold,bookmark,mount` — `receive`, `create`, `destroy`, and `rollback` are

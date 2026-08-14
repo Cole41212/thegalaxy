@@ -86,7 +86,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 | falcon | Main workstation | i5-13600K, RTX 3060Ti, 32GB DDR5, Windows 10 |
 | scout | Laptop | Linux Mint Cinnamon, ethernet + WiFi |
 | comlink | Mobile | iPhone |
-| echo-base | Offsite backup appliance | Raspberry Pi 5, Ubuntu 24.04 arm64, 6 TB USB — mom's house NJ, Tailscale-only (ADR 0010) |
+| echo-base | Offsite backup appliance | Raspberry Pi 5, Ubuntu 24.04 arm64, 6 TB USB — separate physical site, Tailscale-only (ADR 0010) |
 
 ---
 

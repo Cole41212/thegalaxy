@@ -118,12 +118,12 @@ at `10.0.x.x` without double-NAT.
 
 | Hostname | Role | Address | Notes |
 |----------|------|---------|-------|
-| echo-base | Pi 5 offsite backup appliance (ADR 0010) | DHCP on mom's LAN; reached over the tailnet | Raspberry Pi 5, Ubuntu 24.04 arm64, ethernet only. Deliberately **not** static in-OS |
+| echo-base | Pi 5 offsite backup appliance (ADR 0010) | DHCP on the offsite LAN; reached over the tailnet | Raspberry Pi 5, Ubuntu 24.04 arm64, ethernet only. Deliberately **not** static in-OS |
 
-echo-base sits at mom's house in NJ, behind senate's counterpart on that LAN — it is not on
+echo-base sits at the offsite location, behind that site's own router — it is not on
 `10.0.0.0/16` and has no lab IP. It is deliberately DHCP-configured rather than static
 because the appliance is meant to stay location-portable: its durable identity is its tailnet
-address, not any LAN address, so it survives being moved to a different house without
+address, not any LAN address, so it survives being moved to a different site without
 reconfiguration.
 
 It reaches archives at `10.0.30.20` by accepting phantom's advertised `10.0.30.0/24` subnet

@@ -291,19 +291,19 @@ lease table against intended statics periodically.
 **Root cause:** ip-scheme.md claimed a reservation that was never created — falcon was
 dynamic at 10.0.20.105, self-reporting "cole10".
 **Fix:** reservation created 2026-07-14 — initially mis-created with the Mint laptop's MAC
-(Intel `f4:6d:3f:ce:8e:48`, self-reporting "evil"), caught by MAC-vendor cross-reference
-and corrected to falcon's ASRock NIC `9c:6b:00:5f:17:23`. Adopted via release/renew;
+(Intel `f4:6d:3f:xx:xx:xx`, self-reporting "evil"), caught by MAC-vendor cross-reference
+and corrected to falcon's ASRock NIC `9c:6b:00:xx:xx:xx`. Adopted via release/renew;
 falcon now holds 10.0.20.10.
 **Learning:** identify devices by self-reported hostname + MAC vendor before pinning; the
 lease table is evidence, not decoration.
 
 #### IoT reservations
-Created 2026-07-14: echo 10.0.50.10 (`b4:7c:9c:33:46:60`), led-strip 10.0.50.11
-(`c4:4f:33:a3:9b:5f`), levoit-purifier 10.0.50.12, levoit-humidifier 10.0.50.13. Echo and
+Created 2026-07-14: echo 10.0.50.10 (`b4:7c:9c:xx:xx:xx`), led-strip 10.0.50.11
+(`c4:4f:33:xx:xx:xx`), levoit-purifier 10.0.50.12, levoit-humidifier 10.0.50.13. Echo and
 strip power-cycled and confirmed adopted at their reserved addresses 2026-07-14.
 
 #### Issue: unknown Amazon device on TRUSTED — a Fire TV stick in the wrong trust zone
-**Root cause:** the Fire TV stick (10.0.20.100, `80:6d:71:b3:d2:18`) had joined a TRUSTED
+**Root cause:** the Fire TV stick (10.0.20.100, `80:6d:71:xx:xx:xx`) had joined a TRUSTED
 SSID — Amazon hardware belongs on IOTGUEST per the trust-zone policy.
 **Fix:** moved to MosEisley and reserved at 10.0.50.14 (fire-tv); adoption confirmed
 2026-07-14. Caveat: the Fire TV phone-remote app discovers over the local network, so it

@@ -6,7 +6,7 @@
   <!-- Internet -->
   <ellipse cx="460" cy="82" rx="54" ry="19" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
   <text x="460" y="79" fill="#94a3b8" font-size="11" text-anchor="middle">Internet</text>
-  <text x="460" y="92" fill="#475569" font-size="8" text-anchor="middle">FiOS</text>
+  <text x="460" y="92" fill="#475569" font-size="8" text-anchor="middle">ISP — 1G fiber</text>
   <line x1="460" y1="101" x2="460" y2="116" stroke="#475569" stroke-width="1.5"/>
 
   <!-- senate -->

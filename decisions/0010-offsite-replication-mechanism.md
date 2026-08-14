@@ -19,11 +19,12 @@ ride along. Implementation deferred pending hardware (drive enclosure).
 
 ## Amendment — 2026-08-14 (implementation)
 
-Implemented as **echo-base** (Raspberry Pi 5, Ubuntu Server 24.04 arm64) at mom's house in
-NJ, where family remains resident. The decision and its security model stand as written and
-were confirmed in practice: the Pi holds the only credential, that credential is read-only,
-and no lab-side credential can reach the offsite copy. Four points amend the Consequences
-above.
+Implemented as **echo-base** (Raspberry Pi 5, Ubuntu Server 24.04 arm64) at a trusted
+separate physical site with a permanent occupant — chosen because unattended recovery
+sometimes needs someone on site to power-cycle the appliance, and because physical access can
+be arranged when required. The decision and its security model stand as written and were
+confirmed in practice: the Pi holds the only credential, that credential is read-only, and no
+lab-side credential can reach the offsite copy. Four points amend the Consequences above.
 
 **1 — Single-disk, by choice rather than by constraint.** The original text assumed a
 single disk without saying why. Available drives were 6 TB / 4 TB / 3 TB / 1 TB, and both
@@ -52,7 +53,7 @@ creates its own sync snapshot on the source and destroys the previous one, which
 correctly — with `cannot destroy snapshots: permission denied`, because the delegated
 `pibackup` user has no destroy verb. Three options were weighed: leave it (syncoid snapshots
 accumulate on holocron forever); grant `destroy` (rejected — that hands a delete verb to a
-credential living in another house, eroding precisely the property this ADR exists to
+credential living at another site, eroding precisely the property this ADR exists to
 create); or `--no-sync-snap` (chosen — syncoid replicates from the existing TrueNAS periodic
 snapshots and creates nothing that needs cleaning up). Structural elimination over privilege
 escalation, the same reasoning that dropped the MGMT tailnet route in Phase 3 rather than

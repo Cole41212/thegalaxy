@@ -38,9 +38,9 @@ deletes, and pool corruption all replicate instantly).
 **Operational since 2026-08-14** (ADR 0010, Phase 5). Day-to-day procedures live in
 [runbooks/offsite-replication.md](../runbooks/offsite-replication.md).
 
-- **Appliance:** `echo-base` — Raspberry Pi 5, Ubuntu Server 24.04 LTS (arm64), at mom's
-  house in NJ. Ethernet, DHCP on senate's LAN, reachable **only** over Tailscale — no
-  port-forwarding, no exposure, no inbound anything. Deliberately not static in-OS: the
+- **Appliance:** `echo-base` — Raspberry Pi 5, Ubuntu Server 24.04 LTS (arm64), at a family
+  member's residence. Ethernet, DHCP on that site's LAN, reachable **only** over Tailscale —
+  no port-forwarding, no exposure, no inbound anything. Deliberately not static in-OS: the
   appliance is location-portable and its durable identity is its tailnet address.
 - **Pool:** `carbonite` — single 6 TB disk, `ashift=12`, `compression=lz4`, `atime=off`,
   native ZFS encryption (`aes-256-gcm`), unlocked at boot from a keyfile on the Pi's SD card

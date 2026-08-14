@@ -107,5 +107,5 @@ not in the pool.
 | falcon | i5-13600K · RTX 3060Ti · 32 GB · Win10 | workstation, 10.0.20.10 |
 | scout | Linux Mint laptop | future SECLAB attack box (VLAN 60) |
 | comlink | iPhone | VLAN 20 |
-| echo-base | Raspberry Pi 5 · Ubuntu 24.04 arm64 · USB-C 4-bay enclosure (ASMedia ASM235CM bridge, VIA Labs hub, UAS) · 1× 6 TB SATA seated | offsite backup appliance, operational 2026-08-14 — mom's house NJ, ethernet + DHCP, Tailscale-only (ADR 0010). Pool `carbonite`, encrypted, single-disk by choice. 3 spare drives (4/3/1 TB) held cold |
+| echo-base | Raspberry Pi 5 · Ubuntu 24.04 arm64 · USB-C 4-bay enclosure (ASMedia ASM235CM bridge, VIA Labs hub, UAS) · 1× 6 TB SATA seated | offsite backup appliance, operational 2026-08-14 — separate physical site, ethernet + DHCP, Tailscale-only (ADR 0010). Pool `carbonite`, encrypted, single-disk by choice. 3 spare drives (4/3/1 TB) held cold |
 | panel-1 / panel-2 | Asus T100T / X205T | dashboard displays (Phase 6) |

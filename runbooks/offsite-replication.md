@@ -5,8 +5,9 @@ Build log: [phases/phase-5-vault-immich.md](../phases/phase-5-vault-immich.md).
 
 ## What this is
 
-`echo-base` (Raspberry Pi 5, Ubuntu 24.04 arm64) at mom's house **pulls** ZFS snapshots from
-`archives` over Tailscale, nightly, into an encrypted single-disk pool called `carbonite`.
+`echo-base` (Raspberry Pi 5, Ubuntu 24.04 arm64) at a family member's residence **pulls** ZFS
+snapshots from `archives` over Tailscale, nightly, into an encrypted single-disk pool called
+`carbonite`.
 
 The direction matters. The lab holds no credential that can touch the offsite copy, and the
 Pi's credential into the lab is read-only. Nothing in the lab can encrypt, delete, or corrupt
@@ -15,7 +16,7 @@ granting `pibackup` more ZFS permissions.**
 
 | | |
 |---|---|
-| Appliance | `echo-base` — DHCP on mom's LAN, reached only over the tailnet |
+| Appliance | `echo-base` — DHCP on the offsite LAN, reached only over the tailnet |
 | Pool | `carbonite` — single 6 TB disk, `aes-256-gcm`, key at `/root/.carbonite.key` (mode 400) |
 | Datasets | `carbonite/photos` ← `holocron/photos` · `carbonite/media` ← `holocron/media` |
 | Source account | `pibackup` on archives (UID 3002) — read-only ZFS delegation |

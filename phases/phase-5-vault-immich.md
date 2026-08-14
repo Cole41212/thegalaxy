@@ -584,11 +584,11 @@ build narrative.
 
 **echo-base** — Raspberry Pi 5 on Ubuntu Server 24.04 LTS (arm64), flashed with Raspberry Pi
 Imager using cloud-init customization for hostname, user, SSH key, key-only auth, and no
-WiFi. It lives at mom's house in NJ, behind senate, on ethernet with a DHCP address. Not
-static in-OS, and deliberately so: the appliance is meant to stay location-portable, and its
-durable identity is its tailnet address rather than any LAN IP. Timezone corrected from the
-Imager default (`Etc/UTC`) to `America/New_York` — see the timezone entry below, which turned
-out to matter more than it looks.
+WiFi. It lives at a family member's residence, behind that site's router, on ethernet with a
+DHCP address. Not static in-OS, and deliberately so: the appliance is meant to stay
+location-portable, and its durable identity is its tailnet address rather than any LAN IP.
+Timezone corrected from the Imager default (`Etc/UTC`) to `America/New_York` — see the
+timezone entry below, which turned out to matter more than it looks.
 
 **carbonite** — a single-disk encrypted ZFS pool on the 6 TB drive, addressed by
 `/dev/disk/by-id` rather than `/dev/sdX`, because enumeration order is not stable and is
@@ -604,11 +604,11 @@ the tailnet and accepts phantom's advertised `10.0.30.0/24` route with
 `tailscale up --accept-routes`; Linux clients ignore advertised subnet routes unless
 explicitly opted in, unlike iOS and macOS. IP forwarding is enabled via
 `/etc/sysctl.d/99-tailscale.conf` — not needed for the pull itself, pre-staged for the
-planned site-to-site routing onto mom's LAN. Key expiry is disabled on this node: an
+planned site-to-site routing onto the offsite LAN. Key expiry is disabled on this node: an
 unattended box carrying a ~180-day node key expiry is a silent outage timer. Verified with
 `ping 10.0.30.20` returning `ttl=63` — one hop, phantom forwarding. This is the same path
-that will keep working after the lab relocates to NY, so the appliance needs no
-reconfiguration then.
+that will keep working after the lab relocates, so the appliance needs no reconfiguration
+then.
 
 **pibackup** — the least-privilege service account on archives: TrueNAS local user, UID 3002,
 own primary group, password disabled, no SMB, no UI access, no API keys, home at
@@ -693,7 +693,7 @@ same pass — the form defaulted to `/var/empty`, which is shared and non-writab
 set to `/mnt/holocron/pibackup`.
 
 #### Learning
-A sudo-capable account whose private key lives on a Pi in another house would have inverted
+A sudo-capable account whose private key lives on a Pi at another site would have inverted
 the entire security model of ADR 0010: the whole point is that the offsite credential cannot
 modify the source. Reviewing the form field by field caught what a glance would have missed,
 precisely because every *other* setting on that form read correctly locked-down.
