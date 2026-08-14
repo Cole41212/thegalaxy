@@ -74,10 +74,24 @@ re-verify them (and NIC names) after any hardware change.
 | 5000cca05c2983ec | HGST HUS724040ALS640 | SAS | SAS3008 | CMR |
 | PBHRLHVX | (confirm) | SAS | SAS3008 | CMR |
 | PCGRUTJX | (confirm) | SAS | SAS3008 | CMR |
-| (fill) | (confirm) | SAS | SAS3008 | — |
+| PEJSRYWX | HGST HUS72404CLAR4000 | SAS | SAS3008 | CMR |
 | (fill) | (confirm) | SAS | SAS3008 | — |
 
 All HDDs confirmed CMR (suitable for ZFS).
+
+**2026-08-11 — SAS drive replacement.** Serial PBG7ZLHX (HGST HUS724040ALS640) FAULTED with
+unrecovered read errors surfaced by the weekly scrub, and was replaced by PEJSRYWX
+(HGST HUS72404CLAR4000 — the EMC-branded variant of the same Ultrastar 7K4000). Cold-swapped
+into the same physical slot, where it took over the device name `sdd`; the pool resilvered
+with 0 errors. Logical block size was verified as 512 bytes with `sg_readcap --long`
+**before** installing — ex-array enterprise SAS drives, EMC-branded ones especially, are
+frequently 520-byte formatted and unusable by ZFS without a multi-hour `sg_format`. Full
+write-up in [phases/phase-5-vault-immich.md](../phases/phase-5-vault-immich.md).
+
+PBG7ZLHX was never individually mapped to a row in the table above, so the removed drive
+cannot be pinned to a specific line — and two models plus one serial in the SAS group are
+still unconfirmed. Re-confirm the whole SAS group against TrueNAS → Storage → Disks at the
+next opportunity.
 
 ## ZFS pool
 Pool `holocron` (confirm) — 2× 6-drive RAIDZ2 vdevs, one pool. ~29 TiB usable; tolerates
@@ -93,5 +107,5 @@ not in the pool.
 | falcon | i5-13600K · RTX 3060Ti · 32 GB · Win10 | workstation, 10.0.20.10 |
 | scout | Linux Mint laptop | future SECLAB attack box (VLAN 60) |
 | comlink | iPhone | VLAN 20 |
-| Pi 5 + 6 TB USB HDD | offsite backup appliance | at relative's, Tailscale-only (ADR 0010 — pending drive enclosure) |
+| echo-base | Raspberry Pi 5 · Ubuntu 24.04 arm64 · USB-C 4-bay enclosure (ASMedia ASM235CM bridge, VIA Labs hub, UAS) · 1× 6 TB SATA seated | offsite backup appliance, operational 2026-08-14 — mom's house NJ, ethernet + DHCP, Tailscale-only (ADR 0010). Pool `carbonite`, encrypted, single-disk by choice. 3 spare drives (4/3/1 TB) held cold |
 | panel-1 / panel-2 | Asus T100T / X205T | dashboard displays (Phase 6) |

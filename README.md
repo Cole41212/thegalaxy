@@ -86,6 +86,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 | falcon | Main workstation | i5-13600K, RTX 3060Ti, 32GB DDR5, Windows 10 |
 | scout | Laptop | Linux Mint Cinnamon, ethernet + WiFi |
 | comlink | Mobile | iPhone |
+| echo-base | Offsite backup appliance | Raspberry Pi 5, Ubuntu 24.04 arm64, 6 TB USB — mom's house NJ, Tailscale-only (ADR 0010) |
 
 ---
 
@@ -100,7 +101,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 | 104 | order66 | Ubuntu Server 24.04 LTS | Pi-hole DNS | 30 | ✅ Running |
 | 105 | inquisitor | — | Wazuh SIEM | 30 | Phase 6 |
 | 106 | cantina | Ubuntu Server 24.04 LTS | Jellyfin media server — RX 5700 GPU passthrough | 30 | ✅ Running |
-| 107 | vault | Ubuntu Server 24.04 LTS | Immich (photo/video, self-hosted iCloud replacement) | 30 | Phase 5 |
+| 107 | vault | Ubuntu Server 24.04 LTS | Immich (photo/video, self-hosted iCloud replacement) | 30 | ✅ Running |
 | 108 | rogue | — | Vulnerable VM (isolated, no internet) | 60 | Phase 7 |
 
 ---
@@ -115,15 +116,16 @@ visibility, and recoverability. Full write-up: [docs/threat-model.md](docs/threa
 |-------|-------|--------|
 | **1** | Core network — OPNsense, VLANs, managed switch, WiFi AP | ✅ Complete |
 | **2** | Docker services (shipyard), Crafty/Minecraft, TrueNAS VM | ✅ Complete |
-| **3** | Pi-hole DNS filtering + Tailscale remote access | ✅ Complete\* |
+| **3** | Pi-hole DNS filtering + Tailscale remote access | ✅ Complete |
 | **4** | Jellyfin media server with GPU transcoding | ✅ Complete |
-| **5** | Immich photo platform + iCloud migration | ⬜ |
+| **5** | Immich photo platform + iCloud migration | 🚧 Migrated · offsite gate met — soak + cleanup pending |
 | **6** | Wazuh SIEM + dashboard displays | ⬜ |
 | **7** | Security lab — scout (attack laptop) + rogue (isolated vulnerable VM) | ⬜ |
 | **8** | AI tools + portfolio website | ⬜ |
 
-\* Offsite appliance pending hardware — tracked in
-[phases/phase-3-dns-and-tailscale.md](phases/phase-3-dns-and-tailscale.md).
+The offsite appliance deferred in Phase 3 (`echo-base` — Pi 5, encrypted ZFS, pull-based
+replication over Tailscale) was built during Phase 5 and has been operational since
+2026-08-14 — see [runbooks/offsite-replication.md](runbooks/offsite-replication.md).
 
 ---
 
@@ -134,7 +136,7 @@ visibility, and recoverability. Full write-up: [docs/threat-model.md](docs/threa
 | 2 | Proxmox VE · Docker · TrueNAS/ZFS · PCIe controller passthrough · IOMMU isolation · RAIDZ2 · NFS |
 | 3 | Pi-hole · recursive Unbound · Tailscale · firewall policy · 3-2-1 backup |
 | 4 | GPU passthrough · Jellyfin hardware transcode |
-| 5 | Self-hosted photo management · rw NFS design · cloud-service migration |
+| 5 | Self-hosted photo management · rw NFS design · cloud-service migration · encrypted ZFS offsite replication · least-privilege ZFS delegation · ransomware-resistant backup design |
 | 6 | Wazuh SIEM · log-pipeline design · detection engineering · dashboards |
 | 7 | Attack/defend range · vulnerability management · network isolation |
 | 8 | Cloudflare Tunnel · DMZ design · automation/scripting |

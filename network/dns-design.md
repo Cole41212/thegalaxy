@@ -48,7 +48,8 @@ no exception and therefore no working DNS by default — deliberate, finalized i
   at tarkin's firewall, the correct layer; order66 has zero inbound exposure beyond it.
 - Conditional forwarding: 10.0.0.0/16 → 10.0.30.1; local domain `galaxy.internal`
   (`.internal` is the ICANN-reserved private-use TLD).
-- Naming: Kea reservations for devices worth naming (cantina added in Phase 4). The
+- Naming: Kea reservations for devices worth naming (cantina added in Phase 4, vault in
+  Phase 5 — same DHCP-in-OS deviation, see network/ip-scheme.md). The
   os-kea-unbound plugin was declined (unsigned package on the firewall — supply chain).
   Phase 4 corrected the Phase 3 model of *how* registration happens — see the
   dependency below.

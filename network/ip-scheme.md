@@ -114,6 +114,30 @@ at `10.0.x.x` without double-NAT.
 
 ---
 
+## Offsite (not on any lab subnet)
+
+| Hostname | Role | Address | Notes |
+|----------|------|---------|-------|
+| echo-base | Pi 5 offsite backup appliance (ADR 0010) | DHCP on mom's LAN; reached over the tailnet | Raspberry Pi 5, Ubuntu 24.04 arm64, ethernet only. Deliberately **not** static in-OS |
+
+echo-base sits at mom's house in NJ, behind senate's counterpart on that LAN — it is not on
+`10.0.0.0/16` and has no lab IP. It is deliberately DHCP-configured rather than static
+because the appliance is meant to stay location-portable: its durable identity is its tailnet
+address, not any LAN address, so it survives being moved to a different house without
+reconfiguration.
+
+It reaches archives at `10.0.30.20` by accepting phantom's advertised `10.0.30.0/24` subnet
+route (`tailscale up --accept-routes` — Linux clients ignore advertised routes unless
+explicitly opted in, unlike iOS and macOS). Verified with `ping 10.0.30.20` returning
+`ttl=63`: one hop, phantom forwarding. **No new firewall rules, no port forwards, and no
+static routes were required**, and this same path keeps working after the lab relocates to
+NY. Node key expiry is disabled on echo-base — an unattended appliance with a ~180-day key
+expiry is a silent outage timer.
+
+Tailnet addresses are deliberately not recorded in this repo.
+
+---
+
 ## Minecraft
 
 Server runs on `shipyard` (Docker container via Crafty Controller).

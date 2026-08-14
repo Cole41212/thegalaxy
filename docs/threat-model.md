@@ -35,11 +35,16 @@ knowingly accepted (below).
 - **Lab malware escaping the range** (Phase 7) → SECLAB blocked from 10.0.0.0/16; rogue has
   no internet; only scout (attacker) reaches it.
 - **Lateral movement Servers → Trusted** → explicitly blocked at tarkin.
+- **Ransomware, or any lab-side compromise, reaching the backups** → the offsite copy is
+  *pulled*, never pushed. No lab-side credential can write to or delete from `carbonite`,
+  and the credential pointing the other way is read-only (ADR 0010). Local backups and ZFS
+  snapshots share the lab's fate by design; the offsite tier is the one that does not.
 
 ## Key controls
 802.1Q segmentation · default-deny inter-VLAN firewall · per-client DNS filtering (Pi-hole)
-+ recursive Unbound · centralized logging → Wazuh (Phase 6) · ZFS RAIDZ2 + local & offsite
-backups · Cloudflare Tunnel for any public service.
++ recursive Unbound · centralized logging → Wazuh (Phase 6) · ZFS RAIDZ2 + local backups +
+pull-based encrypted offsite replication (ADR 0010, operational 2026-08-14) · Cloudflare
+Tunnel for any public service.
 
 ## Accepted risks / out of scope
 - **Single-host SPOF:** tarkin, archives, and all services run on one Proxmox box; host loss
@@ -68,4 +73,27 @@ backups · Cloudflare Tunnel for any public service.
   a dedicated non-admin account scoped to the media dataset (ADR 0013). No new firewall
   rule was involved — TRUSTED's full access to SERVERS is the documented design (trust
   zones above), so the control here is credential scope, not the network path.
+- **Offsite copy is currently in the same town as the lab.** echo-base is at mom's house in
+  NJ and the lab is also in NJ, so today the offsite tier delivers ransomware isolation,
+  hardware-failure independence, and household separation — different building, different
+  power, different ISP — but not regional separation. A single area-wide event could reach
+  both sites. This closes when the lab relocates to NY, at which point the same appliance
+  over the same tailnet path gives real geographic separation with no reconfiguration.
+  TODO(cole): characterize this — accepted risk until relocation, or a tracked gap with a
+  target date?
+- **`pibackup` is a delegated credential resident on off-site hardware.** The account lives
+  on archives but its private key sits on a Pi in another house, outside physical control.
+  Blast radius if echo-base is stolen or compromised: **read** access to `holocron/photos`
+  and `holocron/media`, and nothing else. The delegation is
+  `send,snapshot,hold,bookmark,mount` — `receive`, `create`, `destroy`, and `rollback` are
+  withheld, so the credential cannot encrypt, delete, or alter the source. carbonite is
+  ZFS-encrypted with a key that never leaves the Pi, so the stolen-hardware case yields
+  ciphertext. Accepted deliberately: this is the cost of pull-based replication, and it is
+  strictly better than the push alternative, where a *lab-side* credential could destroy
+  offsite history (ADR 0010).
+- **Device configs have no offsite copy.** `holocron/configs` was never created, so the
+  OPNsense XML export and switch config exist only in the local, gitignored
+  `config-backups/`. Design goal 4 (recoverability) is therefore met for data but not yet
+  for configs — a total site loss would mean rebuilding tarkin and death-star from the
+  runbooks rather than restoring them. Tracked in ADR 0010.
 - Physical security, ISP-level threats, and supply chain are out of scope.

@@ -6,7 +6,7 @@ remote access through a single Tailscale gateway (phantom). Along the way: a lea
 audit that made the documented reservations real and caught a trust-zone violation, and
 the offsite replication mechanism decided (ADR 0010).
 
-**Status:** ✅ Complete — offsite appliance deferred pending hardware (ADR 0010; see Open items)
+**Status:** ✅ Complete — the deferred offsite appliance was built in Phase 5 (2026-08-14)
 
 ---
 
@@ -112,7 +112,7 @@ stay dynamic; reservations are for stable-MAC devices only.
 | phantom rebuilt (ID 101) | ✅ | Subnet router 10.0.30.0/24 + exit node |
 | Tailnet DNS override → Pi-hole | ✅ | Verified on-net (laptop) and off-net (phone, LTE) |
 | ADRs 0010 + 0011 recorded | ✅ | Offsite mechanism; remote-access gateway pattern |
-| Pi 5 offsite appliance | ⬜ | Deferred — pending drive enclosure (ADR 0010) |
+| Pi 5 offsite appliance | ✅ | Built in Phase 5 as `echo-base`, operational 2026-08-14 (ADR 0010) |
 
 ---
 
@@ -334,9 +334,14 @@ the secondary.
 
 ## Open items
 
-- **Pi 5 offsite appliance** — deferred pending hardware (drive enclosure). Mechanism
-  decided and recorded in ADR 0010 (pull-based syncoid over Tailscale); prerequisites on
-  archives (snapshot tasks, `holocron/media-keep`, `holocron/configs`) land with the build.
+- ~~**Pi 5 offsite appliance**~~ — **closed 2026-08-14.** Built as `echo-base` during
+  Phase 5 and replicating `holocron/photos` + `holocron/media`; restore test passed. See the
+  [ADR 0010 implementation amendment](../decisions/0010-offsite-replication-mechanism.md),
+  the [Phase 5 log](phase-5-vault-immich.md), and
+  [runbooks/offsite-replication.md](../runbooks/offsite-replication.md). Two prerequisites
+  named here resolved differently than planned: `holocron/media-keep` was superseded (media
+  is small enough to replicate whole) and `holocron/configs` was never created, so configs
+  still have no offsite copy — that gap is now tracked in ADR 0010.
 - **SECLAB DNS** — none by design; posture defined in Phase 7.
 - **pveproxy exposure mitigations** — pve-firewall or a LISTEN_IP bind; from-home tasks,
   deferred (accepted risk in docs/threat-model.md).
