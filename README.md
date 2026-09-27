@@ -32,9 +32,9 @@ configurations on real hardware.
 ### Network Topology
 
 ```
-Internet → senate (Asus GT-AX11000, 192.168.1.1)
+Internet → senate (ISP-supplied gateway, 192.168.1.1)
                │
-               │ static route: 10.0.0.0/16 → 192.168.1.100
+               │ static route: 10.0.0.0/16 → 192.168.1.200
                │
            executor (Proxmox VE 9.1.1)
            ├── enp0s31f6 → vmbr0 (WAN, 192.168.1.225)
@@ -42,7 +42,7 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
                    │
                ┌───▼──────────┐
                │    tarkin     │  OPNsense 26.1.6
-               │ WAN: .1.100  │  6 VLAN interfaces
+               │ WAN: .1.200  │  6 VLAN interfaces
                │ DHCP + DNS   │  Kea DHCPv4
                │ Firewall     │  802.1Q inter-VLAN routing
                └───┬──────────┘
@@ -77,12 +77,12 @@ Internet → senate (Asus GT-AX11000, 192.168.1.1)
 
 | Hostname | Role | Specs |
 |----------|------|-------|
-| executor | Proxmox hypervisor | i7 7700T, 64GB DDR4, 512GB NVMe, 2x512GB SSD, 12×4TB HDD (6 SATA + 6 SAS), RX 5700 8GB + HD 630, 2× NICs |
+| executor | Proxmox hypervisor | i7 7700T, 64GB DDR4, 512GB NVMe, 2× SATA SSD (Samsung 860 EVO 500GB + Crucial BX200 480GB), 12×4TB HDD (6 SATA + 6 SAS), RX 5700 8GB + HD 630, 2× NICs |
 | tarkin | OPNsense firewall (VM) | VM on executor |
 | archives | TrueNAS SCALE (VM) | VM on executor, HDD controller passthrough |
 | death-star | Core switch | ZX-SWTGW215AS, 8-port 2.5G managed |
 | holonet | WiFi AP | TP-Link TL-WA1201, Multi-SSID mode |
-| senate | House router | Asus GT-AX11000 (family network, not lab-managed) |
+| senate | House router | ISP-supplied gateway (family network, not lab-managed) |
 | falcon | Main workstation | i5-13600K, RTX 3060Ti, 32GB DDR5, Windows 10 |
 | scout | Laptop | Linux Mint Cinnamon, ethernet + WiFi |
 | comlink | Mobile | iPhone |

@@ -92,11 +92,32 @@ Tunnel for any public service.
   ciphertext. Accepted deliberately: this is the cost of pull-based replication, and it is
   strictly better than the push alternative, where a *lab-side* credential could destroy
   offsite history (ADR 0010).
+- **Wazuh agents run as root on every monitored host, and the manager can configure them.**
+  New exposure, accepted at Phase 6 (ADR 0020). The agent must run as root to do its job — FIM
+  hashes files no unprivileged user may read, syscollector enumerates every process and
+  listening socket, and log collection reads `auth.log` and its equivalents. Because the
+  manager can push configuration to agents, **compromise of inquisitor yields root across the
+  lab, plus the ability to delete the evidence of how it happened.** That places inquisitor
+  alongside executor and tarkin in the assets list above, and it is a category the lab did not
+  previously have: no single component held lab-wide root reach before this. Mitigations, all
+  structural rather than procedural: `remote_commands` stays **disabled** (the default), which
+  is what stops a manager-pushed `agent.conf` from executing arbitrary commands — and is why
+  the Immich dump-freshness check is configured locally on vault instead; **active response is
+  disabled globally**, because auto-blocking in a lab whose router is a VM on the same host as
+  the SIEM is a self-inflicted lockout (revisit in Phase 7, on the attack range); **authd uses
+  an enrolment password**, not open registration; `client.keys` is treated as a secret and
+  backed up only to the encrypted offsite pool, never to this repo (ADR 0019); and the manager
+  is reachable from **VLAN 30 and the tailnet only**. Accepted because the alternative — no
+  agents — gives up FIM, inventory, and configuration assessment on every host, which is most
+  of the visibility design goal 3 exists to deliver. Agents dial out, so no monitored host
+  needs an inbound port for this.
 - **Device configs have no offsite copy.** `holocron/configs` was never created, so the
   OPNsense XML export and switch config exist only in the local, gitignored
   `config-backups/`. Design goal 4 (recoverability) is therefore met for data but not yet
   for configs — a total site loss would mean rebuilding tarkin and death-star from the
-  runbooks rather than restoring them. Tracked in ADR 0010.
+  runbooks rather than restoring them. Tracked in ADR 0010; **scheduled for closure in Phase 6
+  under ADR 0019**, which creates the dataset for the Wazuh configuration export and adds it to
+  the syncoid replication set, carrying the OPNsense and switch configs along with it.
 - **Repository is public.** Software versions, network topology, VLAN design, and firewall
   rules are published deliberately as portfolio content. This is only an aid to an attacker
   in combination with the site's public IP, which does not appear in the repo and cannot be

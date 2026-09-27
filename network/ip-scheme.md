@@ -2,7 +2,10 @@
 
 All homelab traffic runs on `10.0.0.0/16`. The house network (`senate`) runs on
 `192.168.1.0/24`. A static route on `senate` points `10.0.0.0/16` to `tarkin`'s
-WAN IP (`192.168.1.100`), enabling house devices to reach homelab services.
+WAN IP (`192.168.1.200`), enabling house devices to reach homelab services.
+senate's DHCP pool is narrowed to 192.168.1.2–192.168.1.99 so the lab's WAN-facing
+statics sit in a range its DHCP server cannot assign (ADR 0022) — the inverse of the
+lab's own convention, where statics sit below .100.
 
 ---
 
@@ -29,7 +32,7 @@ DHCP pools begin at `.100` to avoid conflicts.
 | Hostname | Role | IP | VLAN | Notes |
 |----------|------|----|------|-------|
 | tarkin | OPNsense firewall | 10.0.10.1 (gateway), 10.0.20.1, etc. | All | Gateway on each VLAN |
-| tarkin | WAN | 192.168.1.100 | — | Static, DHCP reservation on senate |
+| tarkin | WAN | 192.168.1.200 | — | Static, above the senate DHCP pool (ADR 0022) |
 | executor | Proxmox hypervisor | 10.0.10.10 | 10 | HTTPS :8006 |
 | executor | House management | 192.168.1.225 | — | Static on senate network |
 | death-star | Managed switch | 10.0.10.2 | 10 | HTTP :80 |
@@ -97,16 +100,16 @@ NOT reserved — a reservation pinned to a rotating MAC breaks silently.
 
 | Device | IP | Notes |
 |--------|----|-------|
-| senate | 192.168.1.1 | Asus GT-AX11000, house router/gateway |
+| senate | 192.168.1.1 | ISP-supplied gateway, house router/gateway |
 | executor | 192.168.1.225 | Proxmox management, DHCP reservation |
-| tarkin WAN | 192.168.1.100 | OPNsense WAN, DHCP reservation |
+| tarkin WAN | 192.168.1.200 | OPNsense WAN, static — above the senate DHCP pool (ADR 0022) |
 
 ### senate Static Route
 
 ```
 Destination: 10.0.0.0
 Netmask:     255.255.0.0
-Gateway:     192.168.1.100 (tarkin WAN)
+Gateway:     192.168.1.200 (tarkin WAN)
 ```
 
 This route enables all house devices on `192.168.1.x` to reach homelab services

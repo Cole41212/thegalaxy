@@ -2,7 +2,7 @@
 
 **VM:** tarkin (ID 100) on executor (Proxmox)  
 **OPNsense version:** 26.1.6  
-**WAN IP:** 192.168.1.100 (static, DHCP reservation on senate)  
+**WAN IP:** 192.168.1.200 (static, above the senate DHCP pool — ADR 0022)  
 **LAN bootstrap:** 192.168.100.1/24 (em0, for initial access before switch config)  
 **Primary access:** https://10.0.20.1 (from TRUSTED VLAN after full config)
 
@@ -13,7 +13,7 @@
 | NIC | Proxmox Device | Bridge | VLAN Tag | OPNsense Interface |
 |-----|----------------|--------|----------|--------------------|
 | net0 | em0 | vmbr1 | none (trunk) | LAN — all VLAN sub-interfaces |
-| net1 | vtnet0 | vmbr0 | none | WAN — 192.168.1.100 |
+| net1 | vtnet0 | vmbr0 | none | WAN — 192.168.1.200 |
 
 > **Critical:** net0 (em0) must have NO Proxmox VLAN tag — it receives all VLAN tags
 > from the switch trunk and OPNsense reads them via sub-interfaces. net1 (vtnet0) must
@@ -127,7 +127,7 @@ If the OPNsense web UI is unreachable:
 1. Access tarkin console via Proxmox → VM 100 → Console
 2. Option 8 (Shell) for command line access
 3. `pfctl -d` — temporarily disables firewall (auto-restores on reboot)
-4. Access web UI at `192.168.1.100` from a house network device
+4. Access web UI at `192.168.1.200` from a house network device
 
 ---
 

@@ -18,7 +18,7 @@ Two physical NICs serve different purposes:
 
 `vmbr0` carries untagged traffic for:
 - Proxmox host management (192.168.1.225)
-- tarkin WAN NIC (vtnet0, 192.168.1.100)
+- tarkin WAN NIC (vtnet0, 192.168.1.200)
 
 `vmbr1` carries tagged VLAN traffic (IDs 10–60) for:
 - tarkin LAN NIC (em0, all VLAN sub-interfaces)

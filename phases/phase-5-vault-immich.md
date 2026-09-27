@@ -845,13 +845,16 @@ garbage-collects on an unpublished schedule.
 Stated as concrete inputs, not notes — these are the starting backlog for the monitoring
 phase.
 
-1. **Proxmox alert mail does not deliver.** postfix on executor cannot reach the configured
-   Gmail address (connect timed out / network unreachable to `gmail-smtp-in`, messages
-   deferred), so Proxmox alert mail has not been arriving at all. The 2026-08-02
-   pool-degraded alert was never received and the drive fault was found manually days later.
-   Fix SMTP delivery — a relay with an app password, or an alternative notification target.
-   **This is the highest-value monitoring gap in the lab:** every other alerting improvement
-   is worth less while the existing alerts go nowhere.
+1. ~~**Proxmox alert mail does not deliver.**~~ — **closed 2026-08-16.** postfix on executor
+   could not reach the configured Gmail address (connect timed out / network unreachable to
+   `gmail-smtp-in`, messages deferred), so Proxmox alert mail had not been arriving at all,
+   and the 2026-08-02 pool-degraded alert was never received. Root cause was an empty
+   `relayhost` — postfix attempting direct-to-MX delivery on port 25, which the ISP blocks —
+   compounded by `inet_protocols=all` making every attempt try IPv6 first. Fixed by
+   reconfiguring postfix as an authenticated satellite relay to `[smtp.gmail.com]:587`;
+   verified by the receiving server's own acceptance code. Full diagnosis in
+   [phases/phase-6-inquisitor-wazuh.md](phase-6-inquisitor-wazuh.md); the alerting design it
+   opened out into is [ADR 0021](../decisions/0021-alerting-and-notification-path.md).
 2. **Immich DB dumps are unmonitored** — build a Wazuh rule alerting on no-new-dump-in-48h.
    Interim mitigation is a monthly manual check that the newest file in `/mnt/photos/backups`
    is recent and non-trivially sized (ADR 0016 known gap; procedure in
@@ -861,27 +864,41 @@ phase.
    available and deliberately unapplied. Define the process — read release notes, verify a
    current dump, note the version the dump came from, update, verify — rather than leaving it
    to drift (ADR 0014 patch-cadence consequence).
-4. **`pvescheduler` replication-state noise on executor** — logs `replication: invalid json
-   data in /var/lib/pve-manager/pve-replication-state.json` every 60 seconds, and has done
-   since at least 2026-07-19. No PVE replication jobs are configured, so it is harmless in
-   itself, but it floods the journal and would bury real signal during an incident. Reset the
-   state file. Confirm the current state first — the "before the bulk import" deadline this
-   was originally written against has passed.
-5. **ADR 0014 revisit: file sync / Nextcloud.** Trigger **(b)** — "Phase 6 wanting an
-   auth-log-rich application target" — is now live, which moves this from a scheduled revisit
-   to an active decision. The other two triggers (external share links, SMB proving
-   insufficient for remote file access) remain unfired. Note that `holocron/files` already
-   exists and is empty.
+4. ~~**`pvescheduler` replication-state noise on executor**~~ — **closed 2026-08-16.** The
+   host logged `replication: invalid json data in
+   /var/lib/pve-manager/pve-replication-state.json` every 60 seconds. **Date correction:** the
+   noise dated from **2026-06-06**, not "at least 2026-07-19" as originally recorded here — it
+   ran for **71 days**. The file was 2 bytes of NUL, not malformed config: an ext4
+   delayed-allocation artefact of an unclean shutdown during Phase 2's controller-passthrough
+   work, established from the preserved mtime sitting 49 minutes *before* the following boot.
+   Reset to `{}`, lossless (no replication jobs configured), verified silent over 20
+   consecutive cycles. Full write-up in
+   [phases/phase-6-inquisitor-wazuh.md](phase-6-inquisitor-wazuh.md).
+5. ~~**ADR 0014 revisit: file sync / Nextcloud.**~~ — **closed 2026-08-17.** Trigger (b),
+   "Phase 6 wanting an auth-log-rich application target", was evaluated and **declined**: vault,
+   cantina, shipyard, and order66 already provide application authentication logs, so the
+   requirement is met by services that exist. Standing up a file-sync platform purely to have
+   something to detect against inverts the priority — a service, an attack surface, a patch
+   obligation, and RAM the host does not have, for log lines already available elsewhere.
+   `holocron/files` stays empty; triggers (a) and (c) remain unfired. Recorded as the
+   [ADR 0014 amendment](../decisions/0014-photo-platform-immich.md).
 6. **`holocron/configs` was never created**, so the OPNsense XML export and the switch config
    have no offsite copy and live only in the local, gitignored `config-backups/`. ADR 0010's
    Consequences listed this as a requirement and it is unmet; the replication set currently
-   carries `holocron/photos` and `holocron/media` only. Create the dataset and add it to the
-   replication set, or accept the gap explicitly in the threat model.
+   carries `holocron/photos` and `holocron/media` only. **Now scheduled** under
+   [ADR 0019](../decisions/0019-siem-data-placement-and-backup.md), which puts Wazuh's
+   `/var/ossec/etc/` on the dataset nightly and adds it to the syncoid set — but the dataset
+   does **not yet exist**, so this item stays open until it does.
 7. **Cold spare drive policy** — keep at least one tested 4 TB spare on hand. The 2026-08-11
    `sdd` replacement worked because a suitable drive happened to be available; that is luck,
    not a policy. "Tested" is load-bearing: verify logical block size with `sg_readcap --long`
    *before* shelving a used enterprise SAS drive, so the 520-byte-sector discovery happens at
-   purchase rather than during a degraded-pool rebuild.
+   purchase rather than during a degraded-pool rebuild. **Extended 2026-08-17:** the policy as
+   written covers **4 TB HDDs only**, and there is **no spare SSD** at all. That now matters —
+   the SIEM's 200 GiB data disk sits on `ssd-inquisitor`, the Crucial BX200, which the
+   2026-08-17 SMART baseline identifies as the lab's most-worn storage device (11,318 hours,
+   44.7 TiB written) and whose SMART self-assessment is structurally incapable of reporting
+   failure (docs/hardware-inventory.md).
 
 ### Accepted / no action
 

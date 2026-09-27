@@ -11,8 +11,8 @@
 
   <!-- senate -->
   <rect x="300" y="116" width="320" height="50" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
-  <text x="460" y="136" fill="#94a3b8" font-size="11" font-weight="bold" text-anchor="middle">senate — house router (Asus GT-AX11000)</text>
-  <text x="460" y="152" fill="#475569" font-size="8" text-anchor="middle">192.168.1.1 · static route 10.0.0.0/16 → 192.168.1.100</text>
+  <text x="460" y="136" fill="#94a3b8" font-size="11" font-weight="bold" text-anchor="middle">senate — house router (ISP-supplied gateway)</text>
+  <text x="460" y="152" fill="#475569" font-size="8" text-anchor="middle">192.168.1.1 · static route 10.0.0.0/16 → 192.168.1.200</text>
   <line x1="460" y1="166" x2="460" y2="182" stroke="#475569" stroke-width="1.5"/>
   <text x="466" y="178" fill="#475569" font-size="7.5">WAN (enp0s31f6 → vmbr0)</text>
 
@@ -32,7 +32,7 @@
   <text x="96" y="312" fill="#94a3b8" font-size="8">VLAN 40 family  10.0.40.1</text>
   <text x="96" y="326" fill="#94a3b8" font-size="8">VLAN 50 iot     10.0.50.1</text>
   <text x="96" y="340" fill="#94a3b8" font-size="8">VLAN 60 seclab  10.0.60.1</text>
-  <text x="205" y="357" fill="#475569" font-size="7.5" text-anchor="middle">WAN 192.168.1.100 · LAN trunk em0</text>
+  <text x="205" y="357" fill="#475569" font-size="7.5" text-anchor="middle">WAN 192.168.1.200 · LAN trunk em0</text>
 
   <!-- archives -->
   <rect x="346" y="214" width="230" height="68" rx="8" fill="#1e293b" stroke="#22c55e" stroke-width="1.5"/>
