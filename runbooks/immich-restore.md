@@ -180,7 +180,8 @@ carried.
    - *Clean path:* build a new VM to the Phase 5 spec in
      [phases/phase-5-vault-immich.md](../phases/phase-5-vault-immich.md) — VM 107, Ubuntu
      Server 24.04 **standard** install, q35 + OVMF (uncheck Pre-Enroll Keys), 3 vCPU host type
-     with CPU units 50, 12 GB with ballooning off, 80 GB scsi0 on the NVMe with discard + SSD
+     with CPU units 50, 8 GB with ballooning off (built at 12 GB for the bulk import; trimmed
+     2026-09-25, Phase 6 log), 80 GB scsi0 on the NVMe with discard + SSD
      emulation + iothread, vmbr1 tag 30, qemu-guest-agent. Then reapply the OS-level
      configuration from that document: `Acquire::ForceIPv4`, the local `immich` account at
      UID/GID 3001 (nologin), and the `/etc/hosts` self-hostname line pointing at 10.0.30.40

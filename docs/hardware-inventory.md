@@ -144,7 +144,7 @@ still unconfirmed. Re-confirm the whole SAS group against TrueNAS → Storage �
 next opportunity.
 
 ## ZFS pool
-Pool `holocron` (confirm) — 2× 6-drive RAIDZ2 vdevs, one pool. ~29 TiB usable; tolerates
+Pool `holocron` — 2× 6-drive RAIDZ2 vdevs, one pool. ~29 TiB usable; tolerates
 2 simultaneous failures per vdev. TrueNAS boot/system is the 32 GB SCSI vdisk on the NVMe,
 not in the pool.
 
@@ -153,7 +153,7 @@ not in the pool.
 |---|---|---|
 | death-star | ZX-SWTGW215AS — 2.5 G 8-port managed switch | 10.0.10.2 |
 | holonet | TP-Link TL-WA1201 AP | Multi-SSID (VLAN 20/40/50), 10.0.20.3 |
-| senate | Asus GT-AX11000 | house router (not lab-managed) |
+| senate | ISP-supplied gateway | house router (not lab-managed). An Asus GT-AX11000 until the 2026-08-26 site relocation — [runbooks/site-relocation.md](../runbooks/site-relocation.md) |
 | falcon | i5-13600K · RTX 3060Ti · 32 GB · Win10 | workstation, 10.0.20.10 |
 | scout | Linux Mint laptop | future SECLAB attack box (VLAN 60) |
 | comlink | iPhone | VLAN 20 |

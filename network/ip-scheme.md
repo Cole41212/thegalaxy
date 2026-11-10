@@ -134,7 +134,7 @@ route (`tailscale up --accept-routes` — Linux clients ignore advertised routes
 explicitly opted in, unlike iOS and macOS). Verified with `ping 10.0.30.20` returning
 `ttl=63`: one hop, phantom forwarding. **No new firewall rules, no port forwards, and no
 static routes were required**, and this same path keeps working after the lab relocates to
-NY. Node key expiry is disabled on echo-base — an unattended appliance with a ~180-day key
+another site. Node key expiry is disabled on echo-base — an unattended appliance with a ~180-day key
 expiry is a silent outage timer.
 
 Tailnet addresses are deliberately not recorded in this repo.

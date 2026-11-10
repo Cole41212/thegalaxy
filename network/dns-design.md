@@ -1,18 +1,29 @@
 # DNS Design
 
-**Status: Implemented 2026-07-13 (Phase 3); recursion leg broken by ISP interception
-2026-09-26/27 — see the next section before relying on anything below.** SECLAB deferred to
-Phase 7 as designed. Build details and incidents: phases/phase-3-dns-and-tailscale.md.
+**Status: Implemented 2026-07-13 (Phase 3). Two temporary deviations from this design are
+still live as of 2026-11-10 — read the next section before relying on the resolution path
+below.** SECLAB deferred to Phase 7 as designed. Build details and incidents:
+phases/phase-3-dns-and-tailscale.md.
 
-## ⚠️ Partially superseded — ISP DNS interception (2026-09-26/27)
+## ⚠️ Live deviations — left over from the ISP interception incident (2026-09-26/27)
 
-**The recursion leg documented below does not currently work.** The ISP began transparently
-intercepting all outbound port 53 traffic after a same-day plan change, which broke Unbound's
-recursive resolution and nothing else. Two deviations from this document are live; both are
-listed under "Live deviations" at the end of this section. Full incident narrative:
+**The design below is correct and is the target state; the lab is not yet back on it.** For a
+period beginning 2026-09-26 the ISP transparently intercepted all outbound port 53 traffic,
+which broke Unbound's recursive resolution and nothing else. The cause was an ISP-side
+security feature enabled automatically with a service plan change. It has since been removed
+and the interception has ended. Two workarounds applied during the incident have **not yet
+been reverted**. Full incident narrative:
 [phases/phase-6-inquisitor-wazuh.md](../phases/phase-6-inquisitor-wazuh.md).
 
-### How it was proven
+| Deviation | Status | Closes when |
+|---|---|---|
+| Pi-hole's upstream is a public resolver, not Unbound-on-tarkin | Live since 2026-09-26/27 | Unbound recursion is re-verified and Pi-hole's upstream is set back to exactly `10.0.30.1` |
+| DNSSEC validation is **off** in Unbound | Live since 2026-09-26/27 | Validation is re-enabled and a signed name returns the `ad` flag. The 2026-10-11 root KSK rollover passed while validation was off, so this is a verification, not a checkbox |
+
+Recorded here rather than left as undocumented drift, because a source-of-truth document that
+describes a design the network is not running is worse than one that admits the gap.
+
+### How the interception was proven
 A query for a name pointed at an **RFC 5737 TEST-NET-1** address returned **NOERROR with
 answers, over both UDP and TCP**. No server exists at that address and none can — the range is
 reserved and unroutable — so anything that answers is not the server that was addressed. The
@@ -33,28 +44,16 @@ failure was invisible from the majority of the system, which is the opposite of 
 The onset looked gradual because it was **cache expiry**: names failed one at a time as their
 TTLs aged out of Unbound's cache, not all at once when the interception began.
 
-### Where this is going: DNS over TLS
-Plaintext recursion is impossible on this connection — no Unbound configuration survives an
-interceptor rewriting every port 53 answer. The resolver moves to **DoT forwarding on port
-853**, which the interception does not touch. DoT was verified clean against both candidate
-upstreams with **CA-chained certificates** confirmed, not merely "the connection succeeded".
-
-**Not yet implemented, and deliberately so.** Moving from private recursion to third-party
-forwarding reverses [ADR 0004](../decisions/0004-dns-topology.md), which rejected public
-forwarders on privacy grounds, and reverses the "no public resolver sees the lab's query
-stream" property stated under *Why this topology* above. That is a cross-cutting design
-reversal, not a configuration change, so it gets its own ADR first. Per-client visibility —
-the security property this whole topology exists to produce — is unaffected either way, since
-it is produced at Pi-hole, upstream of this leg.
-
-### Live deviations
-| Deviation | Status | Closes when |
-|---|---|---|
-| Pi-hole's upstream is not Unbound-on-tarkin | Live since 2026-09-26/27 | The DoT ADR is written and implemented |
-| DNSSEC validation is **off** | Live since 2026-09-26/27 | **Hard deadline: 2026-10-11 root KSK rollover** |
-
-Recorded here rather than left as undocumented drift, because a source-of-truth document that
-describes a design the network is not running is worse than one that admits the gap.
+### Considered and dropped: DNS over TLS
+While the interception was live, plaintext recursion was impossible on this connection, and
+the planned response was to move Unbound to **DoT forwarding on port 853** — verified clean
+against two candidate upstreams, with **CA-chained certificates** confirmed rather than merely
+"the connection succeeded". That would have reversed
+[ADR 0004](../decisions/0004-dns-topology.md), which rejected public forwarders on privacy
+grounds, so it was held for its own ADR. The interception ended before that ADR was written
+and the migration was **dropped**: ADR 0004 stands, and no public resolver is part of the
+design. The DoT verification stays on record as the known-good fallback if plaintext port 53
+is ever interfered with again.
 
 ## Goal
 One network-wide filtering resolver with private recursion, and per-client query

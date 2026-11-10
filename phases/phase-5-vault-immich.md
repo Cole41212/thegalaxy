@@ -658,7 +658,7 @@ firing before the tunnel exists would just fail with a connection error.
 **Monitoring** — a healthchecks.io dead-man's switch, one check per dataset, pinged from
 `ExecStartPost` so it fires only on `ExecStart` success. A failed run therefore produces
 silence, and silence is what raises the alert. Period is 1 day.
-TODO(cole): record the configured grace period.
+The grace period is set on each check at healthchecks.io and is not recorded in this repo.
 
 ### 2026-08-14 — Pi booted but was unreachable — a stale bootable OS on a USB drive won the boot order
 

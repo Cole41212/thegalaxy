@@ -1,3 +1,5 @@
 # decisions/ — Architecture Decision Records (ADRs)
 Each file records one decision: context, the choice made, alternatives considered, and
-consequences. ADRs are numbered and immutable — superseded by a new ADR, never edited.
+consequences. ADRs are numbered and immutable: the decision text is never edited. A decision
+that changes is superseded by a new ADR; what was learned implementing one is appended to it
+as a dated `## Amendment` section (see 0010, 0014, 0018).

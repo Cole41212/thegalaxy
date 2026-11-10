@@ -1,7 +1,7 @@
 # Runbook: tarkin OPNsense Configuration
 
 **VM:** tarkin (ID 100) on executor (Proxmox)  
-**OPNsense version:** 26.1.6  
+**OPNsense version:** 26.1.11 (installed as 26.1.6)  
 **WAN IP:** 192.168.1.200 (static, above the senate DHCP pool — ADR 0022)  
 **LAN bootstrap:** 192.168.100.1/24 (em0, for initial access before switch config)  
 **Primary access:** https://10.0.20.1 (from TRUSTED VLAN after full config)

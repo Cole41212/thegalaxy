@@ -73,15 +73,37 @@ Tunnel for any public service.
   a dedicated non-admin account scoped to the media dataset (ADR 0013). No new firewall
   rule was involved — TRUSTED's full access to SERVERS is the documented design (trust
   zones above), so the control here is credential scope, not the network path.
-- **Offsite copy is within the same metropolitan area as the primary site.** echo-base sits
-  at a separate physical site, so today the offsite tier delivers ransomware isolation,
-  hardware-failure independence, and household separation — different building, different
-  power, different ISP — but not regional separation. Correlated regional risk — severe
-  weather, an extended grid outage, any single area-wide event — is not mitigated by this
-  arrangement. A planned relocation will increase geographic separation, at which point the
-  same appliance over the same tailnet path delivers it with no reconfiguration.
-  TODO(cole): characterize this — accepted risk until relocation, or a tracked gap with a
-  target date?
+- **Offsite copy is outside the primary site's metropolitan area — improved by the 2026-08-26
+  relocation, not eliminated as a correlated risk.** echo-base sits at a separate physical
+  site: different building, different household, different ISP, different power utility. The
+  relocation moved the primary site out of the offsite appliance's metro area, which closes the
+  specific gap the earlier version of this entry flagged. The offsite tier now survives
+  localized events — structure fire, burst pipe, theft, a substation or utility-level outage —
+  that were previously capable of destroying both copies in a single incident.
+
+  It does **not** deliver full regional independence. The two sites are still close enough
+  that one large weather system, or one multi-day regional grid event, could plausibly affect
+  both. Correlated regional risk is therefore **reduced, not eliminated**, and is accepted at
+  that level. Genuine regional separation would need an offsite tier in a different region
+  entirely — a different appliance location, or a cloud tier — and is not planned.
+
+  The design prediction held as far as it has been tested: this entry previously stated that a
+  relocation would increase separation "with no reconfiguration," and echo-base needed no
+  changes, because replication rides the tailnet and the tailnet is location-independent.
+  **Not yet verified:** that the first post-move replication pull landed, and how its
+  throughput compares with the 2026-08-14 seed (~76 MiB/s) now that the path crosses a
+  different ISP at the primary end — a slower pull lengthens the effective RPO. Tracked in
+  [runbooks/site-relocation.md](../runbooks/site-relocation.md).
+- **Physical access to echo-base is now a remote-hands dependency.** The relocation traded
+  proximity for separation, and that trade has a cost worth naming. The offsite appliance was
+  previously close enough to attend in minutes; a visit now has to be planned. A failed drive,
+  a wedged USB enclosure — the ADR 0010 falsifier — or a power event the Pi does not recover
+  from now needs either a trip or a household member acting on instructions. This compounds
+  the existing `pibackup` exposure rather than sitting beside it: the delegated credential was
+  already on hardware outside physical control, and now the recovery path is too. Accepted,
+  because the separation it buys is worth more than the proximity it costs. Candidate
+  mitigations if it ever bites: a smart plug or networked PDU on the Pi for remote
+  power-cycling, and a one-page printed recovery card left at the site.
 - **`pibackup` is a delegated credential resident on off-site hardware.** The account lives
   on archives but its private key sits on a Pi at another site, outside physical control.
   Blast radius if echo-base is stolen or compromised: **read** access to `holocron/photos`

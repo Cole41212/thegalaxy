@@ -41,7 +41,7 @@ Internet → senate (ISP-supplied gateway, 192.168.1.1)
            └── enp5s0 → vmbr1 (LAN trunk, VLAN-aware)
                    │
                ┌───▼──────────┐
-               │    tarkin     │  OPNsense 26.1.6
+               │    tarkin     │  OPNsense 26.1.11
                │ WAN: .1.200  │  6 VLAN interfaces
                │ DHCP + DNS   │  Kea DHCPv4
                │ Firewall     │  802.1Q inter-VLAN routing
@@ -94,15 +94,16 @@ Internet → senate (ISP-supplied gateway, 192.168.1.1)
 
 | VM ID | Hostname | OS | Role | VLAN | Status |
 |-------|----------|----|------|------|--------|
-| 100 | tarkin | OPNsense 26.1.6 | Firewall, DHCP, DNS | All | ✅ Running |
+| 100 | tarkin | OPNsense 26.1.11 | Firewall, DHCP, DNS | All | ✅ Running |
 | 101 | phantom | Ubuntu Server 24.04 LTS | Tailscale gateway — subnet router + exit node | 30 | ✅ Running |
 | 102 | archives | TrueNAS SCALE | NAS (dual-controller passthrough) | 30 | ✅ Running |
 | 103 | shipyard | Ubuntu Server 24.04 LTS | Docker, Portainer, Crafty | 30 | ✅ Running |
 | 104 | order66 | Ubuntu Server 24.04 LTS | Pi-hole DNS | 30 | ✅ Running |
-| 105 | inquisitor | — | Wazuh SIEM | 30 | Phase 6 |
+| 105 | inquisitor | Ubuntu Server 24.04 LTS | Wazuh SIEM — manager, indexer, dashboard (4.14.7 all-in-one) | 30 | ✅ Running |
 | 106 | cantina | Ubuntu Server 24.04 LTS | Jellyfin media server — RX 5700 GPU passthrough | 30 | ✅ Running |
 | 107 | vault | Ubuntu Server 24.04 LTS | Immich (photo/video, self-hosted iCloud replacement) | 30 | ✅ Running |
 | 108 | rogue | — | Vulnerable VM (isolated, no internet) | 60 | Phase 7 |
+| 200 | coursework | Kali Linux | Coursework VM — borrows lab infrastructure, not part of the lab design; run on demand, not started at boot | 60 | ⏸ On demand |
 
 ---
 
@@ -148,7 +149,7 @@ thegalaxy/
 ├── README.md
 ├── CLAUDE.md        ← rules for AI-assisted work in this repo
 ├── .claude/skills/  ← repo-audit skill
-├── docs/            ← hardware-inventory, backup-strategy, telemetry-logging, threat-model
+├── docs/            ← hardware-inventory, backup-strategy, telemetry-logging, threat-model, conventions
 ├── decisions/       ← ADRs (numbered, immutable)
 ├── network/         ← ip-scheme, firewall-rules, dns-design, diagrams/
 ├── phases/          ← per-phase build logs

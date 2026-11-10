@@ -72,4 +72,5 @@ unused.
 created, so the OPNsense XML export and the switch config remain only in the local,
 gitignored `config-backups/` folder and have no offsite copy. The Consequences above listed
 this as a requirement and it is unmet.
-TODO(cole): decide whether to open this as a tracked follow-up or accept it explicitly.
+**Resolved 2026-08-17:** opened as a tracked follow-up, not accepted — ADR 0019 schedules the
+`holocron/configs` dataset and its place in the replication set under Phase 6.

@@ -24,21 +24,56 @@ The repo is authoritative. Current state lives in:
 
 ## Documentation standards
 - Every repo change names the **file path + section heading + the change**.
-- **Phase docs** follow three parts: Decisions & Rationale, Checklist (emoji status),
-  and a dated Log where problems use Issue → Root cause → Fix → Learning.
+- **Phase docs** follow five parts: Decisions & Rationale, Checklist (emoji status),
+  Verification evidence, a dated Log where problems use Issue → Root cause → Fix → Learning,
+  and Deferred / follow-ups. Wrong predictions are recorded in the log as wrong, not reshaped.
 - **Cross-cutting decisions** are recorded as ADRs in `decisions/` — numbered and
-  immutable (superseded by a new ADR, never edited).
+  immutable. The decision text is never edited: a decision that changes is superseded by a
+  new ADR, and what was learned implementing one is appended as a dated `## Amendment`.
+- **Open questions are written as tracked follow-ups**, in a Deferred section, not left as
+  inline `TODO` markers in a published document.
 - **Naming** is Star Wars throughout; devices are referred to as hostname (name — what
   it is), e.g. "tarkin (OPNsense firewall)".
 
 ## Security & secrets
 - Device configuration exports (OPNsense XML, switch config) and any keys **never** go in
   the public repo. `config-backups/` is gitignored; real exports live offsite.
+- **No personal location detail.** No place names, no state or region, no street or building
+  detail, and no Wi-Fi network names past or present — an SSID can be looked up to a location.
+  Describe a site by its role ("the primary site", "the offsite location").
+- **No account or addressing detail that identifies the connection:** no public WAN address,
+  no tailnet (100.64.0.0/10) addresses, no ISP plan tier or account detail.
+- **Redact silently.** When something is removed, do not add a sentence saying what was
+  removed or why — the explanation advertises exactly what was taken out. Where a command in
+  a log used a sensitive string as its argument, write `PATTERN` in its place.
+- **Text search cannot audit binaries.** Images, PDFs and certificates need looking at
+  directly; a certificate is handed to every client that connects.
+
+## Operational guardrails
+The standing rules that came out of incidents. The short form lives in `CLAUDE.md`; the
+reasoning lives in the phase log or ADR named beside each.
+- **Check the host memory budget before creating a VM**, not after it misbehaves. RAM on
+  executor is a shared, finite resource. Two things make overcommitting it unusually costly:
+  archives and cantina use PCI passthrough, so their guest RAM is pinned and all host memory
+  pressure lands on the remaining guests; and the kernel evicts the least-recently-used pages,
+  so idle infrastructure — the router, DNS, the tailnet gateway — is swapped first and is the
+  worst thing to have stalled. `qm list` for allocation, `free -h` for real headroom.
+  (Phase 6, 2026-09-24; ADR 0018 amendment.)
+- **After any host power event, verify archives is up and `holocron` is imported with all 12
+  disks before anything else.** A hard NFS mount on a missing pool produces hangs elsewhere
+  that look nothing like a storage fault. (Phase 4; runbooks/site-relocation.md.)
+- **Infrastructure VMs never back up to storage that depends on them.** tarkin and archives
+  back up to local `ssd-vmstore` only. (ADR 0009.)
+- **Let a vendor installer install stock, confirm it works, then adapt it.** Configuration
+  staged for software that does not exist yet cannot be validated against anything. (Phase 6.)
+- **Open every multi-command step with `hostname`.** (Phase 6 — commands were run against the
+  wrong host twice.)
 
 ## Workflow
 - Documentation is written in bulk at phase completion.
 - Commits: `Phase N: <what>` for phase work, `Repo: <what>` for maintenance.
-- Git via GitHub Desktop; Git Bash when the command line is needed.
+- Git from the command line (Git Bash on falcon) or GitHub Desktop; the owner reviews every
+  diff and makes every commit.
 - A new chat is used per phase; after committing and resyncing, a repo audit verifies
   consistency before the next phase begins.
 

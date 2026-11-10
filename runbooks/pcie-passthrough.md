@@ -29,7 +29,9 @@ to match. Re-verify addresses after any hardware change.
 ## 3. Create the VM (GUI)
 - Machine: q35 (required for PCIe passthrough)
 - BIOS: OVMF (UEFI) + EFI disk — **uncheck "Pre-Enroll keys"** so Secure Boot is OFF
-  (TrueNAS doesn't support Secure Boot; pre-enrolled keys cause "Access Denied" at boot)
+  (TrueNAS doesn't support Secure Boot; pre-enrolled keys cause "Access Denied" at boot).
+  **This is TrueNAS-specific.** Guests that boot a signed kernel and bootloader — Ubuntu
+  Server, e.g. inquisitor — keep Pre-Enroll keys checked and Secure Boot ON (Phase 6).
 - CPU: host; RAM: ballooning OFF (ZFS sizes ARC to RAM)
 - Boot disk: small SCSI disk on local-lvm (install target — NOT the pool drives)
 

@@ -8,12 +8,13 @@ notification path, which the lab did not have. Along the way: the deployment mod
 and the log-source split (ADR 0020), and the alerting design itself (ADR 0021).
 
 **Status:** 🚧 In progress — Step 0 (the notification path) and the pre-build hygiene work are
-done, inquisitor is built, and Wazuh 4.14.7 is running all-in-one. Remaining: the alert
-transports beyond mail (Pushover, the deadman, the PVE matchers), the agent rollout, and
-detection content. Two items are open and unresolved: a memory-PSI regression on executor that
-got *worse* after the overcommit fix, and **ISP interception of all outbound port 53**
-(2026-09-26/27) which killed recursion and forces the resolver onto DNS-over-TLS — design
-verified, ADR unwritten, with a hard 2026-10-11 deadline on restoring DNSSEC validation.
+done, inquisitor is built, Wazuh 4.14.7 is running all-in-one, and the index lifecycle is
+configured. Remaining: the alert transports beyond mail (Pushover, the deadman, the PVE
+matchers), the agent rollout, and detection content. Two items are open: a memory-PSI
+regression on executor that got *worse* after the overcommit fix, and two DNS deviations left
+over from the 2026-09-26/27 ISP interception incident. The interception itself has ended — it
+was an ISP-side security feature, since removed — but Pi-hole's upstream and DNSSEC validation
+have not yet been returned to the documented design.
 
 ---
 
@@ -205,17 +206,17 @@ got worse the following night, not better. That is open and instrumented, below.
 | Deadman checks live (executor + inquisitor) | ⬜ | Hourly ping, 90-minute grace; two checks, not one |
 | Quarterly re-test scheduled | ⬜ | Triggered real events, not vendor test buttons |
 | `pvescheduler` journal noise cleared | ✅ | 2026-08-16 — root-caused to an unclean shutdown; silent over 20 cycles |
-| `feetwifi` hostname purge | ✅ | 2026-08-16 → 17 — hosts, mailname, search domain, aliases, **and the TLS certificate** |
+| Stale hostname suffix purged | ✅ | 2026-08-16 → 17 — hosts, mailname, search domain, aliases, **and the TLS certificate** |
 | Storage pre-flight | ✅ | 2026-08-17 — both mounts held across device-letter drift; `is_mountpoint 1`; content types narrowed |
 | SMART baseline, both SSDs | ✅ | 2026-08-17 — both PASSED; replacement trigger recorded for the BX200 |
 | `holocron/configs` dataset + syncoid | ⬜ | ADR 0019 — also closes Phase 5 deferred item 6 |
 | inquisitor built (VM 105) | ✅ | Secure Boot **ON** — deliberate deviation (above); 10.0.30.60 `dig`-verified before install |
-| `vm.max_map_count=262144` persistent | ⬜ | Prerequisite, not tuning — the all-in-one installer normally sets it; **confirm it persisted** in `/etc/sysctl.d/` |
+| `vm.max_map_count` persistent | ✅ | Explicitly `1048576` in `/etc/sysctl.d/99-wazuh-indexer.conf`. Ubuntu 24.04 already ships that value; an earlier `262144` setting **lowered** it and was corrected (log, 2026-08-21) |
 | Wazuh 4.14.x all-in-one installed | ✅ | **4.14.7** — manager + indexer + dashboard. Two installer failures first, both self-inflicted (log below) |
 | 200 GiB data disk, **Backup unchecked** | ✅ | `backup=0`; raw — no partition table, reserved blocks reclaimed, mounted by UUID with `nofail` + `RequiresMountsFor` |
 | Indexer heap `Xms=Xmx=3g` | ✅ | Set **manually** — 4.14.7 configures a 1 GB heap regardless of RAM (upstream defect, log below) |
-| `number_of_replicas: 0`, archives indices off | ⬜ | Single node cannot allocate a replica; archives indices store every event |
-| ISM policy — rollover + 90-day delete | ✅ | 90-day delete across 26 time-series indices; current-state indices permanently excluded |
+| `number_of_replicas: 0`, archives indices off | ✅ | Both are Wazuh 4.14 defaults — **verified, not configured**: every index reads `rep 0`, and active shards equal primary shards |
+| ISM policy — 90-day delete | ✅ | `wazuh-retention-90d`: delete at 90 days across 26 time-series indices. **No rollover** — daily and weekly indices are already period-bounded. Current-state indices permanently excluded |
 | authd enrolment password set | ⬜ | Not open registration |
 | `remote_commands` disabled · active response off | ⬜ | ADR 0020 blast-radius mitigations |
 | Agents enrolled — 8 hosts | ⬜ | inquisitor, executor, shipyard, vault, cantina, order66, phantom, falcon |
@@ -226,16 +227,16 @@ got worse the following night, not better. That is open and instrumented, below.
 | Immich dump freshness check | ⬜ | Configured **locally on vault** (`remote_commands` is off by design) — Phase 5 item 2 |
 | SERVFAIL-ratio rule on order66 | ⬜ | Phase 3 seed |
 | Dashboards on panel-1 / panel-2 | ⬜ | |
-| Vulnerability detection enabled | ⬜ | **Found ON by default** — 13.7 GB on root before any agent existed; disabled and reclaimed. Re-enable after soak, headroom planned (log below) |
-| Index sharding corrected | ✅ | Order-10 template — 3 shards/day → 1, verified twice; filebeat rewrites edits to its own |
+| Vulnerability detection enabled | ⬜ | **Found ON by default** — 13.7 GB on root before any agent existed; disabled and reclaimed. Re-enable only after soak, with its feed planned off the root volume (ADR 0018 amendment; log below) |
+| Index sharding corrected | ✅ | Order-10 template `wazuh-custom` — 3 shards/day → 1, verified twice; filebeat rewrites edits to its own |
 | Unattended-restart hardening | ✅ | needrestart no longer auto-restarts Wazuh; `KillMode=control-group` drop-in; tested across two restarts |
 | `net-tools` installed | ✅ | rootcheck's port check and rule 533's port-change monitoring were both broken without it |
-| executor memory budget corrected | ✅ | 61.0 GiB / 5.9 GiB swapped → 53.0 GiB / zero swap; new pre-create gate |
+| executor memory budget corrected | ✅ | 61.0 GiB / 5.9 GiB swapped → 53.0 GiB / zero swap (coursework VM on demand, vault 12 → 8 GiB); new pre-create gate |
 | SIEM self-health check | ⬜ | `active` ≠ working — the wazuh-db socket outage ran 11 days undetected |
 | Memory PSI regression | 🚧 | **Worse** after the fix — 22.2 s full stall vs ~7 s/day baseline. Instrumented, unresolved |
-| DNS recursion — ISP interception | 🚧 | 2026-09-26/27 — all outbound :53 intercepted; recursion dead, forwarders unaffected. DoT on 853 verified; **ADR pending** before implementation |
-| DNSSEC validation restored | ⬜ | **Deviation live** — hard deadline **2026-10-11** root KSK rollover |
-| Pi-hole upstream returned to Unbound | ⬜ | **Deviation live** — tracked in network/dns-design.md; closes with the DoT ADR |
+| DNS recursion — ISP interception | ✅ | 2026-09-26/27 — all outbound :53 intercepted; recursion dead, forwarders unaffected. Cause: an ISP-side security feature bundled with a plan change, **since removed**. No DoT migration and no ADR needed. Recursion not yet re-verified — next two rows |
+| DNSSEC validation restored | ⬜ | **Deviation still live (2026-11-10).** The 2026-10-11 root KSK rollover passed with validation off — confirm validated answers (`ad` flag) when re-enabling |
+| Pi-hole upstream returned to Unbound | ⬜ | **Deviation still live (2026-11-10)** — tracked in network/dns-design.md; revert once Unbound recursion and validation are re-verified |
 
 ---
 
@@ -258,7 +259,7 @@ deviations from the ADR are marked and reasoned through under Decisions & Ration
 | Network | vmbr1, VLAN tag 30, VirtIO |
 | Guest agent | qemu-guest-agent enabled |
 | IP | 10.0.30.60 — DHCP in-OS + Kea reservation (cantina/vault pattern) |
-| Kernel | `vm.max_map_count=262144`, set persistently |
+| Kernel | `vm.max_map_count=1048576` and `vm.swappiness=1`, set persistently in `/etc/sysctl.d/99-wazuh-indexer.conf` |
 | APT | `Acquire::ForceIPv4 "true"` at build time — third IPv6-first incident in this lab |
 | Wazuh | 4.14.7 all-in-one — manager + indexer + dashboard |
 | Indexer heap | `Xms=Xmx=3g`, set **manually** — the 4.14.7 installer computes 1 GB regardless of host RAM |
@@ -296,7 +297,7 @@ where one exists, per ADR 0021's first principle.
 - **No data was at risk:** `/etc/pve/replication.cfg` is absent — no replication jobs are
   configured — so resetting the state file to `{}` was lossless.
 
-### `feetwifi` purge (2026-08-16 → 17)
+### Stale hostname suffix purge (2026-08-16 → 17)
 
 - **The certificate is the item that mattered:** `pvecm updatecerts --force` regenerated the
   node certificate *after* `/etc/hosts` was corrected, so the new CN derives from
@@ -327,7 +328,7 @@ where one exists, per ADR 0021's first principle.
 | Crucial BX200 480 GB | `ssd-inquisitor` | 11,318 | 44.7 TiB | 94% (WAF ≈1.95×) |
 | Samsung 860 EVO 500 GB | `ssd-vmstore` | 4,466 | 5.6 TiB | ~99% |
 
-### inquisitor build and Wazuh install (TODO(cole): date)
+### inquisitor build and Wazuh install (2026-08-21 → 2026-08-24)
 
 - **Address verified before services:** 10.0.30.60 from the Kea reservation, confirmed with
   `dig` — the cantina/vault pattern, checked before anything was installed on the box.
@@ -341,7 +342,7 @@ where one exists, per ADR 0021's first principle.
 - **Upstream defect located by line:** the 4.14.7 installer divides a variable that is never
   assigned at line 1689, producing a 1 GB heap regardless of host RAM. Corrected to `3g`.
 
-### wazuh-db socket outage (TODO(cole): date)
+### wazuh-db socket outage (2026-09-22)
 
 - **The symptom that exposed it:** the dashboard reported no API connection while all four
   services read `active` under systemd. The API was listening; `wazuh-db`'s Unix socket was
@@ -350,7 +351,7 @@ where one exists, per ADR 0021's first principle.
 - **Fix tested, not assumed:** verified across two consecutive restarts with both layers in
   place — needrestart excluded, and `KillMode=control-group`.
 
-### Memory and disk (TODO(cole): date)
+### Memory and disk (2026-09-22 → 2026-09-25)
 
 - **A falsifiable prediction, stated in advance and held:** the manager's 4.2 G as reported by
   systemd was predicted to be almost entirely reclaimable page cache rather than anonymous
@@ -359,16 +360,20 @@ where one exists, per ADR 0021's first principle.
   volume with zero agents enrolled; root usage 24 G → 11 G after reclaim.
 - **executor:** 61.0 GiB allocated / 5.9 GiB swapped, tarkin the most-swapped guest at 30% →
   53.0 GiB / zero swap.
+- **Passthrough pinning measured, not assumed:** `VmLck` in `/proc/<pid>/status` for archives
+  and cantina matched each guest's allocation to within 0.05%. The ~140 MiB each had in swap
+  was QEMU's own process memory, not guest RAM.
 - **Not resolved:** memory PSI *worsened* after that correction — 22.2 s of full stall the
   following night against a prior average near 7 s/day. Two hypotheses with distinguishable
   signatures; a sampler is running to separate them.
 
-### Index lifecycle (TODO(cole): date)
+### Index lifecycle (2026-09-25 → 2026-09-26)
 
-- **Sharding 3/day → 1/day, verified twice** — fixed at a separate order-10 template, because
-  filebeat rewrites edits to its own.
-- **ISM at 90 days now manages 26 time-series indices**; current-state indices are excluded
-  permanently.
+- **Sharding 3/day → 1/day, verified twice** — fixed at a separate order-10 template
+  (`wazuh-custom`), because filebeat rewrites edits to its own. Witnesses: the first daily
+  index created after the template, and a throwaway index created and deleted to test it.
+- **ISM policy `wazuh-retention-90d` manages 26 time-series indices** (confirmed through the
+  explain API); current-state indices are excluded permanently.
 
 ---
 
@@ -465,10 +470,10 @@ failed. Corroborating evidence for a history of unclean shutdowns is already on 
 themselves: 137 power-off retracts on the BX200 and 62 power-on-reset recovery events on the
 860 EVO.
 
-### 2026-08-16 → 2026-08-17 — `feetwifi` purge
+### 2026-08-16 → 2026-08-17 — Stale hostname suffix purged
 
 #### Issue
-The hostname `pve.feetwifi.com` — derived from an SSID at a former residence — persisted across
+A stale domain suffix inherited from the original Proxmox install persisted across
 `/etc/hosts`, `/etc/mailname`, the search domain in `/etc/resolv.conf`, `/etc/aliases.db`, and
 the **CN and SAN of the Proxmox TLS certificate**.
 
@@ -489,7 +494,7 @@ In order, and the order mattered:
 
 #### Learning
 (a) **A diagnostic that can print nothing cannot be trusted.** The check used was
-`grep -r feetwifi /etc/ 2>/dev/null || echo CLEAN`, and it printed *nothing at all* — which
+`grep -r PATTERN /etc/ 2>/dev/null || echo CLEAN`, and it printed *nothing at all* — which
 looked like success and was not. GNU grep 3.5+ sends its binary-file match notice to **stderr**
 while still exiting **0**, so the discarded notice plus a zero exit meant the `|| echo CLEAN`
 branch never ran. The signal was the **absence of the word CLEAN**, which is precisely the kind
@@ -570,7 +575,7 @@ trusting its reading, and specifically before trusting a zero.
 **Replacement trigger recorded:** attribute 169 raw value below **80**, or **any nonzero value**
 in attributes 5, 181, 182, or 199.
 
-### TODO(cole): date — inquisitor built; Wazuh 4.14.7 all-in-one installed
+### 2026-08-21 → 2026-08-24 — inquisitor built; Wazuh 4.14.7 all-in-one installed
 
 VM 105 built to the ADR 0018 specification — 3 vCPU with CPU units 50, 8 GB with ballooning
 off, Ubuntu Server 24.04 standard install, vmbr1 tag 30, and 10.0.30.60 from a Kea reservation,
@@ -586,7 +591,17 @@ ADR 0019.
 The installer was read before it was run, which is how the heap defect two entries below was
 found.
 
-### TODO(cole): date — The Wazuh installer failed twice, both times self-inflicted
+**One instruction in this build was wrong, and was corrected.** `vm.max_map_count` was first
+set to `262144`, on the stated basis that the kernel default is about 65,530. Ubuntu 24.04
+already ships `/etc/sysctl.d/10-map-count.conf` at `1048576`, and files in `sysctl.d` apply in
+lexical order with the last write winning — so the lab's own `99-` file overrode the
+distribution's and **lowered** the limit fourfold. Corrected by setting `1048576` explicitly in
+`/etc/sysctl.d/99-wazuh-indexer.conf`, which keeps the requirement documented and survives an
+upstream change to the shipped file. Learning: read the existing state before writing a config
+file. A value that satisfies a requirement can still be strictly worse than what was already
+there, and it looks deliberate to whoever reads it later.
+
+### 2026-08-21 → 2026-08-24 — The Wazuh installer failed twice, both times self-inflicted
 
 #### Issue
 Attempt 1 refused to run at all, reporting Wazuh already installed. Attempt 2 installed but
@@ -619,7 +634,7 @@ behaves like a defect, because its mistakes surface as installer failures two la
 cause. Install stock, confirm, then adapt. The corollary, from the half of this that worked:
 reading the installer first is cheap, and in the same sitting it found a real upstream bug.
 
-### TODO(cole): date — Wazuh 4.14.7 sets a 1 GB indexer heap regardless of host RAM
+### 2026-08-24 → 2026-09-22 — Wazuh 4.14.7 sets a 1 GB indexer heap regardless of host RAM
 
 #### Issue
 The installer configures the indexer heap at 1 GB on an 8 GB VM, ignoring available memory.
@@ -641,7 +656,7 @@ installer silently setting it wrong and reporting success. It would have present
 as an unexplained performance ceiling with no error anywhere in the logs. Reading an installer
 costs minutes, and paid for itself immediately here.
 
-### TODO(cole): date — Eleven days of silent failure: the wazuh-db socket
+### 2026-09-22 — Eleven days of silent failure: the wazuh-db socket
 
 #### Issue
 The Wazuh dashboard reported no API connection. All four services read `active` under systemd.
@@ -689,7 +704,7 @@ restart into a partial one, and a partial restart into a permanent half-state.
 deadman in ADR 0021, which is still unbuilt. Eleven days is precisely the gap a 90-minute
 grace period closes.
 
-### TODO(cole): date — Vulnerability Detection filled 13.7 GB of root before a single agent existed
+### 2026-09-22 — Vulnerability Detection filled 13.7 GB of root before a single agent existed
 
 #### Issue
 inquisitor's root volume stood at 24 G used. No agents were enrolled; there was nothing to
@@ -715,7 +730,7 @@ reported by systemd was predicted to be almost entirely reclaimable page cache r
 anonymous memory, and was. Stating a falsifiable expectation before measuring is what turns a
 measurement into a test.
 
-### TODO(cole): date — net-tools missing broke two detections; only one of them said so
+### 2026-09-22 — net-tools missing broke two detections; only one of them said so
 
 #### Issue
 Two Wazuh checks were not working: rootcheck's port check, and rule 533's port-change
@@ -741,7 +756,7 @@ quietly, and "no change" is exactly the output you were hoping for. Any check bu
 needs a liveness assertion on its **input**, not only on its output. Same species as the grep
 that reported clean by printing nothing, earlier in this phase.
 
-### TODO(cole): date — executor overcommitted; the router was the most-swapped guest
+### 2026-09-24 → 2026-09-25 — executor overcommitted; the router was the most-swapped guest
 
 #### Issue
 executor was allocating **61.0 GiB** against 62.5 GiB usable, with **5.9 GiB swapped**.
@@ -755,8 +770,19 @@ most likely to be paged out. A router that stalls takes routing, DHCP, and inter
 with it.
 
 #### Fix
+Two guests had been added since the last measurement: inquisitor (8 GiB, sized against the
+budget) and a coursework VM (VM 200, 4 GiB, added without consulting it). Corrected in this
+order, because the order is what keeps the NAS out of the OOM killer's reach:
+
+1. The coursework VM taken off start-at-boot and run on demand.
+2. vault trimmed from 12 GiB to 8 GiB after measuring its steady state — about 2.4 GiB across
+   its four containers. The 12 GiB was sized for the Phase 5 bulk import, which is finished.
+3. Host `vm.swappiness` lowered from 60 to 10.
+4. A one-time `swapoff -a && swapon -a`, gated on available memory exceeding swap in use.
+
 Allocation reduced to **53.0 GiB**; swap drained to zero. **New guardrail:** every new VM is
-checked against the host memory budget *before* creation.
+checked against the host memory budget *before* creation
+([docs/conventions.md](../docs/conventions.md)).
 
 #### Correction
 An earlier working claim in this phase — that the indexer's `bootstrap.memory_lock` protects
@@ -773,7 +799,7 @@ with distinguishable signatures are open, and a sampler is running to separate t
 as open rather than closed: reporting the intervention without the contradicting measurement
 would make this write-up wrong. Carried in Deferred below.
 
-### TODO(cole): date — Oversharding fixed at the template layer
+### 2026-09-25 → 2026-09-26 — Oversharding fixed at the template layer
 
 #### Issue
 The indexer was creating **3 shards per day** where 1 is correct for a single-node cluster at
@@ -784,11 +810,12 @@ Shard count comes from the index template, and editing **filebeat's own template
 hold — filebeat rewrites it.
 
 #### Fix
-A **separate order-10 template**, which takes precedence and survives filebeat rewriting its
+A **separate order-10 template (`wazuh-custom`)**, which takes precedence and survives filebeat rewriting its
 own. 3 shards/day → 1, verified twice.
 
 #### Lifecycle, settled in the same pass
-ISM retention at 90 days now manages **26 time-series indices**. **Current-state indices are
+ISM policy `wazuh-retention-90d` — delete at 90 days, no rollover — now manages **26
+time-series indices** (alerts, statistics, monitoring; archives if ever enabled). **Current-state indices are
 excluded permanently** — they hold live inventory rather than history, so age-based deletion
 there would destroy the current picture instead of old data. That distinction is a property of
 what the index *is*, not a tuning preference, which is why the exclusion is permanent rather
@@ -902,18 +929,45 @@ output against empty output, two entries above.
 interception. It requires no baseline, no prior capture, and no trust in the network being
 tested, and it works the same way for any protocol an operator might silently proxy.
 
+#### Resolution (recorded 2026-11-10)
+The interception ended without any lab-side change. It was an **ISP-side security feature
+enabled automatically with the plan change**, and it has since been removed from the account.
+The root cause as first recorded above was right about *where* and incomplete about *what*: a
+subscriber-facing feature that can be switched off, not a property of the connection.
+
+Consequences:
+
+- **The DoT migration is dropped, and so is its ADR.** ADR 0004's recursive design stands. The
+  DoT verification stays on record as the known-good fallback
+  ([network/dns-design.md](../network/dns-design.md)).
+- **Both interim deviations are still live as of 2026-11-10** — Pi-hole's upstream and DNSSEC
+  validation. Neither was reverted when the interception ended.
+- **The 2026-10-11 root KSK rollover passed while validation was off.** Re-enabling it is
+  therefore a verification rather than a checkbox: a signed name has to come back with the
+  `ad` flag, and a deliberately broken one (`dnssec-failed.org`) has to SERVFAIL.
+
+(f) **Check the account before designing around the network.** A day of design work went into
+a transport migration for a constraint that turned out to be a setting. When an ISP-side
+behaviour changes on the same day as a plan change, the first question is what the new plan
+turned on.
+
 ---
 
 ## Deferred / follow-ups
 
 ### Open investigations
 
-- **ISP DNS interception — DoT migration ADR unwritten.** Plaintext recursion is impossible on
-  this connection (log, 2026-09-26/27). DoT on 853 is verified working against both candidate
-  upstreams, but moving from private recursion to third-party forwarding reverses ADR 0004 and
-  needs its own ADR before implementation. **Two deviations are live in the meantime** —
-  Pi-hole's upstream, and DNSSEC validation, the latter against a hard **2026-10-11** root KSK
-  rollover deadline.
+- **Two DNS deviations still live after the interception ended.** Pi-hole's upstream is still a
+  public resolver and DNSSEC validation is still off in Unbound (log, 2026-09-26/27 and its
+  resolution note). Revert order: confirm the interception is gone (the RFC 5737 probe must
+  time out), re-enable validation and confirm it on Unbound directly, and only then point
+  Pi-hole's upstream back at `10.0.30.1`. No ADR is involved — this returns the lab to
+  ADR 0004, it does not change it.
+- **SECLAB documentation drift.** network/firewall-rules.md and network/dns-design.md describe
+  VLAN 60 as fully blocked with no DNS until Phase 7. A coursework VM (VM 200) now runs there
+  with DNS and internet access, through a tarkin rule the repo does not record. Reconcile the
+  rule into network/firewall-rules.md before writing inter-VLAN detection rules — a rule that
+  alerts on SECLAB egress has to know which egress is sanctioned.
 - **Memory PSI regression on executor — unresolved.** Reducing allocation from 61.0 GiB to
   53.0 GiB and draining swap to zero made memory pressure *worse*, not better: 22.2 s of full
   stall the following night against a prior average near 7 s/day. Two hypotheses with

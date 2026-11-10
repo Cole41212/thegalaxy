@@ -14,7 +14,7 @@
 Use this runbook to configure or reconfigure death-star from scratch.
 This reflects the final dedicated-NIC architecture — executor's LAN NIC (enp5s0; named
 enp1s0/enp3s0 in older docs — renamed by the Phase 4 GPU bus renumbering) connects to
-port 1, and the Asus cable connects directly to executor's WAN NIC (not the switch).
+port 1, and the senate (house router) cable connects directly to executor's WAN NIC (not the switch).
 There are three active ports.
 
 ---

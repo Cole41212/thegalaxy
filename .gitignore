@@ -3,3 +3,4 @@ config-backups/*
 !config-backups/README.md
 # Claude Code — share rules/skills, keep personal prefs local
 .claude/CLAUDE.local.md
+.claude/settings.local.json

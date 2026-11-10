@@ -117,3 +117,53 @@ resource problem came from the feature or from the sizing above.
 **OPNsense block logs only.** Pass logs on a busy interface are the highest-volume, lowest-
 information source available; block logs are the ones that carry the lateral-movement signal
 this lab was segmented to produce (docs/telemetry-logging.md).
+
+## Amendment — 2026-11-10 (as built: three premises that did not hold)
+
+The decision above stands. What follows records where the build diverged from the text, so the
+table is not read as a description of the running system. Evidence for each item is in
+[phases/phase-6-inquisitor-wazuh.md](../phases/phase-6-inquisitor-wazuh.md).
+
+**1. The memory figure in Context was a snapshot, and was read as a budget.** "49.0 GiB across
+seven VMs, roughly 15 GiB available" was accurate on the day it was measured. By 2026-09-24
+allocation had reached 61.0 GiB across nine guests with 5.9 GiB in swap: inquisitor's 8 GiB,
+sized against the figure, and a coursework VM's 4 GiB, added without consulting it. The defect
+was not the number but presenting a point-in-time measurement as a standing property. Corrected
+to 53.0 GiB with zero swap, and the check now happens before a VM is created
+([docs/conventions.md](../docs/conventions.md)). The passthrough paragraph was confirmed by
+measurement — the pinned memory shows as locked (`VmLck`) for the full guest allocation — with
+one refinement: it is the guest's RAM that is pinned, not the whole QEMU process.
+
+**2. "Vulnerability detection: off initially" described a state the product does not start
+in.** It is enabled by default in Wazuh 4.14 and has to be disabled deliberately. The decision
+did not say so, nothing in the build did it, and the feature wrote 13.7 GB of CVE feed to the
+root volume before a single agent was enrolled. Disabling it is a **required build step**.
+Re-enabling stays deferred to after soak, with one added condition: its feed is bulk
+regenerable data and is planned off the root volume first (the ADR 0019 rule).
+
+**3. The 3 GiB heap was specified as if the installer would honour system RAM.** It does not.
+`wazuh-install.sh` 4.14.7 writes a 1 GB heap regardless of host memory, because line 1689
+divides a variable that is never assigned, and it reports success. Setting the heap is a
+**required post-install step with its own verification** (`jvm.options` and the running JVM's
+arguments), not a tuning choice. One consequence the text above does not state:
+`MaxDirectMemorySize` scales to half the heap, so 3 GiB of heap reserves about 4.5 GiB of an
+8 GiB VM. The heap cannot be raised on this host without raising VM RAM first, and item 1 is
+what blocks that.
+
+The common thread: each of the three recorded an intended end state without recording what the
+system does by default, so nothing in the build would have caught the gap.
+
+**Settings in the table that were built differently, or needed no building:**
+
+| Setting | As decided | As built |
+|---|---|---|
+| Kernel | `vm.max_map_count=262144` | `1048576`. Ubuntu 24.04 already ships that value; setting 262144 **lowered** it and was corrected |
+| Index replicas | `number_of_replicas: 0` | Already the Wazuh 4.14 default — verified, not configured |
+| Index shards | not addressed | The default is 3 primary shards per daily index. Reduced to 1 with a separate order-10 template (`wazuh-custom`), because filebeat rewrites edits to its own |
+| Retention | ISM policy — rollover, delete at 90 days | `wazuh-retention-90d`: delete at 90 days, **no rollover** — daily and weekly indices are already period-bounded |
+
+**Retention scope, stated because getting it wrong destroys data:** the policy covers
+`wazuh-alerts-4.x-*`, `wazuh-archives-4.x-*`, `wazuh-statistics-*` and `wazuh-monitoring-*`.
+`wazuh-states-*` indices are excluded permanently. They carry no date suffix — each is a single
+current-state index updated in place — so deleting one by age would remove every host's live
+inventory, not old data.

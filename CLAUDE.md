@@ -21,13 +21,20 @@ Authoritative. Trust them over conversation; if something conflicts, flag it.
 
 ## Editing this repo
 - Every change: file path + section heading + the change.
-- Phase docs: Decisions & Rationale, Checklist (emoji), dated Log
-  (Issue → Root cause → Fix → Learning).
-- Cross-cutting decisions → numbered immutable ADRs in decisions/ (supersede, never edit).
+- Phase docs: Decisions & Rationale, Checklist (emoji), Verification evidence, dated Log
+  (Issue → Root cause → Fix → Learning), Deferred / follow-ups.
+- Cross-cutting decisions → numbered immutable ADRs in decisions/. Never edit the decision
+  text: supersede with a new ADR, or append a dated `## Amendment`. List decisions/ before
+  citing or assigning an ADR number — never cite one that has no file.
+- No inline TODO markers in published docs; an open question is a Deferred item.
 - Star Wars naming; devices as hostname (name — what it is).
 - NEVER commit secrets. config-backups/ contents are gitignored; device XML/keys stay out.
-- NEVER commit or run git on the owner's behalf. Write files; the owner reviews in
-  GitHub Desktop and commits.
+- NEVER write personal location detail: no place names, state or region, no Wi-Fi network
+  names (an SSID geolocates), no public WAN address, no tailnet 100.x addresses, no ISP plan
+  or account detail. Sites are "the primary site" / "the offsite location". Redact silently —
+  never add a sentence describing what was removed. Rules: docs/conventions.md.
+- NEVER commit or run git on the owner's behalf. Write files; the owner reviews the diff
+  and commits.
 
 ## Operational guardrails (never violate)
 - dnsmasq stays disabled (port 67 vs Kea).
@@ -37,3 +44,10 @@ Authoritative. Trust them over conversation; if something conflicts, flag it.
   the NAS — the NAS path depends on tarkin for routing and archives for storage itself.
 - nas-vmbackups NFS mount stays soft,timeo=30,retrans=3 — never change to hard.
 - Hung NFS recovery: umount -f -l /mnt/pve/nas-vmbackups
+- Check executor's memory budget BEFORE creating any VM (qm list, free -h). Passthrough
+  guests are pinned, so pressure lands on the router and DNS first.
+- After any host power event: archives up and holocron imported with 12 disks, before
+  anything else.
+- Pi-hole's upstream is exactly 10.0.30.1 (Unbound on tarkin); Pi-hole's DHCP stays off.
+- Never add wazuh-states-* indices to an age-based retention policy — they hold current
+  state, not history.
