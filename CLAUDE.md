@@ -1,5 +1,6 @@
 # CLAUDE.md — thegalaxy
-Rules for working in this repo. Full write-up in docs/conventions.md.
+Rules for any AI session working in this repo — a phase chat editing the working tree
+directly, or Claude Code. Full write-up in docs/conventions.md.
 
 ## What this is
 A Star Wars-themed cybersecurity homelab, documented as a blue-team portfolio.
@@ -20,6 +21,9 @@ Authoritative. Trust them over conversation; if something conflicts, flag it.
 - Troubleshooting: reason from evidence, state confidence, most decisive test first.
 
 ## Editing this repo
+- Edits are written straight into the working tree, uncommitted. Before the first edit of a
+  session, confirm the working tree matches the pushed commit; never overwrite a file that
+  changed since it was read.
 - Every change: file path + section heading + the change.
 - Phase docs: Decisions & Rationale, Checklist (emoji), Verification evidence, dated Log
   (Issue → Root cause → Fix → Learning), Deferred / follow-ups.
@@ -33,8 +37,8 @@ Authoritative. Trust them over conversation; if something conflicts, flag it.
   names (an SSID geolocates), no public WAN address, no tailnet 100.x addresses, no ISP plan
   or account detail. Sites are "the primary site" / "the offsite location". Redact silently —
   never add a sentence describing what was removed. Rules: docs/conventions.md.
-- NEVER commit or run git on the owner's behalf. Write files; the owner reviews the diff
-  and commits.
+- NEVER commit, push, or run git on the owner's behalf. Write files; the owner reviews the
+  diff and commits. Nothing enters history unread.
 
 ## Operational guardrails (never violate)
 - dnsmasq stays disabled (port 67 vs Kea).

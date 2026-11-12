@@ -10,11 +10,10 @@ and the log-source split (ADR 0020), and the alerting design itself (ADR 0021).
 **Status:** 🚧 In progress — Step 0 (the notification path) and the pre-build hygiene work are
 done, inquisitor is built, Wazuh 4.14.7 is running all-in-one, and the index lifecycle is
 configured. Remaining: the alert transports beyond mail (Pushover, the deadman, the PVE
-matchers), the agent rollout, and detection content. Two items are open: a memory-PSI
-regression on executor that got *worse* after the overcommit fix, and two DNS deviations left
-over from the 2026-09-26/27 ISP interception incident. The interception itself has ended — it
-was an ISP-side security feature, since removed — but Pi-hole's upstream and DNSSEC validation
-have not yet been returned to the documented design.
+matchers), the agent rollout, and detection content. One item is open: a memory-PSI
+regression on executor that got *worse* after the overcommit fix. The 2026-09-26/27 ISP
+interception incident is closed — the interception ended when an ISP-side security feature
+was removed, and both DNS workarounds were reverted on 2026-11-10.
 
 ---
 
@@ -234,9 +233,9 @@ got worse the following night, not better. That is open and instrumented, below.
 | executor memory budget corrected | ✅ | 61.0 GiB / 5.9 GiB swapped → 53.0 GiB / zero swap (coursework VM on demand, vault 12 → 8 GiB); new pre-create gate |
 | SIEM self-health check | ⬜ | `active` ≠ working — the wazuh-db socket outage ran 11 days undetected |
 | Memory PSI regression | 🚧 | **Worse** after the fix — 22.2 s full stall vs ~7 s/day baseline. Instrumented, unresolved |
-| DNS recursion — ISP interception | ✅ | 2026-09-26/27 — all outbound :53 intercepted; recursion dead, forwarders unaffected. Cause: an ISP-side security feature bundled with a plan change, **since removed**. No DoT migration and no ADR needed. Recursion not yet re-verified — next two rows |
-| DNSSEC validation restored | ⬜ | **Deviation still live (2026-11-10).** The 2026-10-11 root KSK rollover passed with validation off — confirm validated answers (`ad` flag) when re-enabling |
-| Pi-hole upstream returned to Unbound | ⬜ | **Deviation still live (2026-11-10)** — tracked in network/dns-design.md; revert once Unbound recursion and validation are re-verified |
+| DNS recursion — ISP interception | ✅ | 2026-09-26/27 — all outbound :53 intercepted; recursion dead, forwarders unaffected. Cause: an ISP-side security feature bundled with a plan change, **since removed**. No DoT migration and no ADR needed |
+| DNSSEC validation restored | ✅ | Re-enabled 2026-11-10. It was off across the 2026-10-11 root KSK rollover |
+| Pi-hole upstream returned to Unbound | ✅ | Set back to exactly `10.0.30.1` on 2026-11-10 — network/dns-design.md |
 
 ---
 
@@ -940,11 +939,16 @@ Consequences:
 - **The DoT migration is dropped, and so is its ADR.** ADR 0004's recursive design stands. The
   DoT verification stays on record as the known-good fallback
   ([network/dns-design.md](../network/dns-design.md)).
-- **Both interim deviations are still live as of 2026-11-10** — Pi-hole's upstream and DNSSEC
-  validation. Neither was reverted when the interception ended.
-- **The 2026-10-11 root KSK rollover passed while validation was off.** Re-enabling it is
-  therefore a verification rather than a checkbox: a signed name has to come back with the
-  `ad` flag, and a deliberately broken one (`dnssec-failed.org`) has to SERVFAIL.
+- **Both interim deviations outlived the interception.** Pi-hole's upstream and DNSSEC
+  validation were not reverted when it ended, and stayed that way until they were noticed in
+  a repo reconciliation — a workaround with no recorded exit condition does not expire by
+  itself.
+- **Both were reverted on 2026-11-10**, in an order chosen so the lab never lost working DNS:
+  confirm the interception is gone (the RFC 5737 probe must time out), re-enable validation
+  and test Unbound directly, and only then point Pi-hole's upstream back at `10.0.30.1`.
+- **The 2026-10-11 root KSK rollover passed while validation was off**, which made
+  re-enabling it a verification rather than a checkbox: a signed name has to come back with
+  the `ad` flag, and a deliberately broken one (`dnssec-failed.org`) has to SERVFAIL.
 
 (f) **Check the account before designing around the network.** A day of design work went into
 a transport migration for a constraint that turned out to be a setting. When an ISP-side
@@ -957,12 +961,6 @@ turned on.
 
 ### Open investigations
 
-- **Two DNS deviations still live after the interception ended.** Pi-hole's upstream is still a
-  public resolver and DNSSEC validation is still off in Unbound (log, 2026-09-26/27 and its
-  resolution note). Revert order: confirm the interception is gone (the RFC 5737 probe must
-  time out), re-enable validation and confirm it on Unbound directly, and only then point
-  Pi-hole's upstream back at `10.0.30.1`. No ADR is involved — this returns the lab to
-  ADR 0004, it does not change it.
 - **SECLAB documentation drift.** network/firewall-rules.md and network/dns-design.md describe
   VLAN 60 as fully blocked with no DNS until Phase 7. A coursework VM (VM 200) now runs there
   with DNS and internet access, through a tarkin rule the repo does not record. Reconcile the

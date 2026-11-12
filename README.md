@@ -7,7 +7,9 @@ SIEM, log analysis, and vulnerability management.
 > **AI-assisted workflow:** Built with Claude (Anthropic) as a pair programmer and
 > documentation partner — a deliberate, modern engineering practice. I make the
 > architecture decisions and do all hands-on configuration and verification on real
-> hardware; AI accelerates research, sanity-checks designs, and produces documentation.
+> hardware; AI accelerates research, sanity-checks designs, and drafts documentation
+> straight into this repo's working tree. I review every diff and make every commit —
+> nothing reaches this repo unread ([how it works](docs/conventions.md#ai-assisted-workflow)).
 > The build logs preserve the reasoning, including faults I diagnosed independently —
 > tracing four missing drives to a single unseated SAS breakout cable via serial-number
 > analysis, and a lab-wide DNS outage to firewall rule ordering.

@@ -1,27 +1,26 @@
 # DNS Design
 
-**Status: Implemented 2026-07-13 (Phase 3). Two temporary deviations from this design are
-still live as of 2026-11-10 — read the next section before relying on the resolution path
-below.** SECLAB deferred to Phase 7 as designed. Build details and incidents:
-phases/phase-3-dns-and-tailscale.md.
+**Status: Implemented 2026-07-13 (Phase 3) and in force.** SECLAB deferred to Phase 7 as
+designed. Build details and incidents: phases/phase-3-dns-and-tailscale.md.
 
-## ⚠️ Live deviations — left over from the ISP interception incident (2026-09-26/27)
+## Incident on record — ISP interception (2026-09-26 → 2026-11-10, closed)
 
-**The design below is correct and is the target state; the lab is not yet back on it.** For a
-period beginning 2026-09-26 the ISP transparently intercepted all outbound port 53 traffic,
-which broke Unbound's recursive resolution and nothing else. The cause was an ISP-side
-security feature enabled automatically with a service plan change. It has since been removed
-and the interception has ended. Two workarounds applied during the incident have **not yet
-been reverted**. Full incident narrative:
+For a period beginning 2026-09-26 the ISP transparently intercepted all outbound port 53
+traffic, which broke Unbound's recursive resolution and nothing else. The cause was an
+ISP-side security feature enabled automatically with a service plan change; it was later
+removed and the interception ended. Full narrative:
 [phases/phase-6-inquisitor-wazuh.md](../phases/phase-6-inquisitor-wazuh.md).
 
-| Deviation | Status | Closes when |
-|---|---|---|
-| Pi-hole's upstream is a public resolver, not Unbound-on-tarkin | Live since 2026-09-26/27 | Unbound recursion is re-verified and Pi-hole's upstream is set back to exactly `10.0.30.1` |
-| DNSSEC validation is **off** in Unbound | Live since 2026-09-26/27 | Validation is re-enabled and a signed name returns the `ad` flag. The 2026-10-11 root KSK rollover passed while validation was off, so this is a verification, not a checkbox |
+Two workarounds were applied during the incident and stayed in place after it ended. Both
+were reverted on 2026-11-10, returning the lab to the design below:
 
-Recorded here rather than left as undocumented drift, because a source-of-truth document that
-describes a design the network is not running is worse than one that admits the gap.
+| Deviation | Live | Closed |
+|---|---|---|
+| Pi-hole's upstream pointed at a public resolver instead of Unbound-on-tarkin | 2026-09-26/27 → 2026-11-10 | Upstream set back to exactly `10.0.30.1` |
+| DNSSEC validation **off** in Unbound | 2026-09-26/27 → 2026-11-10 | Validation re-enabled. It was off across the 2026-10-11 root KSK rollover |
+
+Kept on this page, not only in the phase log, because for six weeks this document described a
+design the network was not running — and a source-of-truth page should say when that was true.
 
 ### How the interception was proven
 A query for a name pointed at an **RFC 5737 TEST-NET-1** address returned **NOERROR with

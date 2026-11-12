@@ -70,15 +70,44 @@ reasoning lives in the phase log or ADR named beside each.
   wrong host twice.)
 
 ## Workflow
-- Documentation is written in bulk at phase completion.
+- One chat per phase. Lab work, troubleshooting and documentation all happen in that chat.
+- Documentation is written in bulk at phase completion; a mid-phase checkpoint is fine when
+  the repo has drifted far enough from the lab to mislead.
 - Commits: `Phase N: <what>` for phase work, `Repo: <what>` for maintenance.
-- Git from the command line (Git Bash on falcon) or GitHub Desktop; the owner reviews every
-  diff and makes every commit.
-- A new chat is used per phase; after committing and resyncing, a repo audit verifies
-  consistency before the next phase begins.
+- Git from the command line (Git Bash on falcon). The owner reviews every diff and makes
+  every commit and push.
+- Two clones exist (falcon and scout). `git fetch` and `git status` before a session on
+  either; never pull blind.
 
 ## AI-assisted workflow
 Claude (Anthropic) is used as a pair programmer and documentation partner. The owner makes
 the architecture decisions and performs all hands-on configuration and verification on real
-hardware; AI accelerates research, sanity-checks designs, and helps produce documentation.
+hardware; AI accelerates research, sanity-checks designs, and drafts the documentation.
 Build logs preserve the reasoning, including independently diagnosed faults.
+
+**How a documentation change reaches this repo:**
+
+1. **The chat is linked to the owner's computer, with access to this repo's folder only.**
+   Claude reads the pushed repository and the working tree, and can write files into the
+   working tree. It has no shell there and cannot run git.
+2. **Before editing, Claude compares the working tree with the pushed commit**, so local work
+   is never overwritten unseen, and each write is refused if the file changed since it was
+   read.
+3. **Claude writes the edits directly into the working tree, uncommitted**, and reports every
+   change as file path + section + what changed.
+4. **The owner reads the diff** (`git diff`, and the new files directly), runs the
+   sanitization check on the staged tree, then commits and pushes.
+
+The line that does not move: **nothing enters this repo's history without the owner reading
+it.** Claude never commits, never pushes, and never runs git on the owner's behalf. An edit
+that is wrong is one `git restore` away from gone.
+
+This replaced an earlier arrangement (through November 2026) in which the chat produced a
+written prompt and a separate Claude Code session carried it out. The hand-off was the weak
+point: instructions were executed at one remove from the evidence, and the gaps showed up as
+drift — an ADR cited that had no file, a runbook that was specified and never created, a
+sanitization step that did not take. Editing in the same chat that holds the evidence removes
+the hand-off; the owner's review of the diff is unchanged.
+
+`CLAUDE.md` holds the short-form rules any AI session must follow when editing this repo, and
+`.claude/skills/repo-audit/` holds the consistency audit run after a phase is committed.
